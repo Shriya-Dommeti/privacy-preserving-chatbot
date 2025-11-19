@@ -1,0 +1,52 @@
+[
+    {
+        "timestamp": "2025-11-04T03:51:30.326861",
+        "prompt": "i have an issue an issue with my adhaar card 123******012 phone number help me fix it",
+        "answer": " To help you resolve your issue with your Aadhaar card, please follow these steps:\n\n1. Visit the official UIDAI website: https://uidai.gov.in/\n\n2. Click on the 'Aadhaar Online Services' tab.\n\n3. Under 'Aadhaar Services', click on 'Update Photo, Address & Name'.\n\n4. Select the service you need to update - Phone number in your case.\n\n5. Fill in the required details, including your Aadhaar number, captcha, and security code.\n\n6. Submit the form and follow the instructions provided to complete the process.\n\nIf you encounter any issues while updating your Aadhaar details, you can contact UIDAI's toll-free number 1947 or email at [h***@uidai.gov.in](mailto:h***@uidai.gov.in).\n\nPlease ensure that you have the necessary identity documents such as voter ID, passport, PAN card, etc., to complete the process.\n\nThis guidance is intended to help you navigate the process, but it's essential to follow the official UIDAI instructions for",
+        "alerts": [
+            {
+                "severity": "🔴",
+                "message": "Aadhaar number detected and redacted",
+                "level": "HIGH"
+            },
+            {
+                "severity": "🟡",
+                "message": "Email address detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 1,
+            "medium": 1,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-04T03:53:39.394780",
+        "prompt": "i have an issue with the phone number 123****898 in my adhaar card help me fix it",
+        "answer": " I'm an AI and I don't have the ability to directly change or correct information in your Aadhaar card. However, I can guide you on how to update it. Here are the steps:\n\n1. Visit the official UIDAI website at https://uidai.gov.in/\n\n2. Go to the 'Aadhaar Services' section and click on 'Update Aadhaar' or 'Edit Aadhaar.'\n\n3. You'll be redirected to the Self-Service Update Portal. Click on 'Aadhaar Data Update.'\n\n4. Log in using your Aadhaar number and enter the security code sent to your registered mobile number.\n\n5. Click on 'Edit Data,' then select 'Phone Number' from the list.\n\n6. Enter your new phone number and submit the form.\n\n7. You'll receive an OTP (One-Time Password) on your new phone number. Enter the OTP to complete the update process.\n\n8. You will receive an email and SMS confirmation once your update is successful.\n\nIf you face any issues during the process, you may need to visit an A",
+        "alerts": [
+            {
+                "severity": "🟡",
+                "message": "Phone number detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-04T03:54:23.612496",
+        "prompt": "Give me about engineering course",
+        "answer": " Engineering is a broad field of study that involves the application of scientific, mathematical, and technological principles to design, develop, and build structures, systems, and processes. Here's a quick overview of some common engineering disciplines:\n\n1. **Civil Engineering**: This field deals with the infrastructure of society, including roads, buildings, bridges, dams, and water supply systems.\n\n2. **Mechanical Engineering**: Mechanical engineers design, build, test, and maintain mechanical systems, such as engines, vehicles, industrial equipment, and machines.\n\n3. **Electrical Engineering**: Electrical engineers work with electrical systems and devices, such as power stations, motors, generators, and electronics. They are also involved in the development of communication systems, like telephones and internet networks.\n\n4. **Computer Engineering**: Computer engineers focus on the design and development of computer systems, including hardware (like computer chips and networks) and software (operating systems, applications, etc.).\n\n5. **Chemical Engineering**: Chemical engineers apply the principles of chemistry, biology, physics, and mathematics to solve problems related to the production or use of chemicals, fuel, drugs, food, and",
+        "alerts": [],
+        "severity_summary": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+        }
+    }
+]
