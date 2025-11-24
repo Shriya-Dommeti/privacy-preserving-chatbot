@@ -1,0 +1,1866 @@
+# import re
+# from fastapi import FastAPI, Query
+# from fastapi.responses import RedirectResponse
+# from pydantic import BaseModel
+# from huggingface_hub import InferenceClient
+# import gradio as gr
+# from starlette.middleware.cors import CORSMiddleware
+# import os
+# import json
+# from datetime import datetime
+
+# # Hugging Face API token
+# HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+
+# # Hugging Face client
+# client = InferenceClient(token=HF_TOKEN)
+
+
+# LOG_FILE = "chatbot_history.json"
+
+# def log_interaction(prompt: str, answer: str):
+#     masked_prompt = mask_sensitive_data(prompt)
+#     masked_answer = mask_sensitive_data(answer)
+#     record = {
+#         "timestamp": datetime.utcnow().isoformat(),
+#         "prompt": masked_prompt,
+#         "answer": masked_answer
+#     }
+
+#     try:
+#         with open(LOG_FILE, "r", encoding="utf-8") as f:
+#             data = json.load(f)
+#     except (FileNotFoundError, json.JSONDecodeError):
+#         data = []
+
+#     data.append(record)
+
+#     with open(LOG_FILE, "w", encoding="utf-8") as f:
+#         json.dump(data, f, indent=4, ensure_ascii=False)
+
+# # ---------------------- Sensitive Data Handler ----------------------
+# def redact_sensitive_data(text: str) -> tuple[str, list[str]]:
+#     """Redacts sensitive data and returns (redacted_text, alerts)."""
+#     alerts = []
+
+#     # Email
+#     if re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text):
+#         alerts.append("⚠️ Email detected and redacted.")
+#         text = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[REDACTED_EMAIL]", text)
+
+#     # Phone number
+#     if re.search(r"\b\d{10}\b", text):
+#         alerts.append("⚠️ Phone number detected and redacted.")
+#         text = re.sub(r"\b\d{10}\b", "[REDACTED_PHONE]", text)
+
+#     # Aadhaar (12 digits)
+#     if re.search(r"\b\d{12}\b", text):
+#         alerts.append("⚠️ Aadhaar detected and redacted.")
+#         text = re.sub(r"\b\d{12}\b", "[REDACTED_AADHAAR]", text)
+
+#     return text, alerts
+# def mask_sensitive_data(text: str) -> str:
+#     # Mask Aadhaar (123456789012 -> 123********)
+#     text = re.sub(r"\b(\d{3})\d{5,9}(\d{2})\b", r"\1********\2", text)
+
+#     # Mask phone (9876543210 -> 987****210)
+#     text = re.sub(r"\b(\d{3})\d{4}(\d{3})\b", r"\1****\2", text)
+
+#     # Mask email (john@gmail.com -> j***@gmail.com)
+#     text = re.sub(r"([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})",
+#                   r"\1***\2", text)
+
+#     return text
+# # ---------------------- FastAPI ----------------------
+# app = FastAPI(title="FastAPI + Gradio + HuggingFace")
+
+# # Allow frontend / other origins
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# class ChatRequest(BaseModel):
+#     message: str
+
+# @app.get("/")
+# def root():
+#     return RedirectResponse(url="/docs")
+
+# @app.get("/hello")
+# def hello():
+#     return {"reply": "Hello! FastAPI with Hugging Face + Gradio is running."}
+
+# @app.post("/chat") 
+# def chat(request: ChatRequest, emergency: bool = Query(False)):
+#     try:
+#         # Redact for UI
+#         redacted_user_message, alerts = redact_sensitive_data(request.message)
+
+#         # Call Hugging Face model
+#         response = client.text_generation(
+#             model="mistralai/Mistral-7B-Instruct-v0.3",
+#             text=redacted_user_message,
+#             max_tokens=256,
+#             temperature=0.7
+#         )
+
+#         # Redact assistant reply for UI
+#         redacted_reply, reply_alerts = redact_sensitive_data(response)
+
+#         # Mask before saving logs
+#         masked_user = mask_sensitive_data(request.message)
+#         masked_reply = mask_sensitive_data(response)
+#         log_interaction(masked_user, masked_reply)
+
+#         return {"reply": redacted_reply, "alerts": alerts + reply_alerts}
+
+#     except Exception as e:
+#         return {"error": str(e)}
+
+
+
+    
+# @app.get("/manifest.json")
+# def manifest():
+#     return {
+#         "name": "Chatbot",
+#         "short_name": "Chatbot",
+#         "start_url": "/",
+#         "display": "standalone",
+#         "background_color": "#ffffff",
+#         "description": "FastAPI + Gradio Chatbot"
+#     }
+
+# # ---------------------- Gradio ----------------------
+# def gradio_chat(message, history):
+#     try:
+#         user_message, alerts = redact_sensitive_data(message)
+        
+#         response = client.chat_completion(
+#             model="mistralai/Mistral-7B-Instruct-v0.3",
+#             messages=[{"role": "user", "content": user_message}],
+#             max_tokens=256,
+#             # prompt=user_message,
+#             # max_new_tokens=256,
+#             temperature=0.7
+#         )
+#         reply = response.choices[0].message["content"]
+#         safe_reply, reply_alerts = redact_sensitive_data(reply)
+
+#         # Append assistant response to chat
+#         masked_user = mask_sensitive_data(message)
+#         masked_reply = mask_sensitive_data(reply)
+#         log_interaction(masked_user, masked_reply)
+        
+#         full_reply = safe_reply
+#         if alerts or reply_alerts:
+#             full_reply += "\n\n" + "\n".join(alerts + reply_alerts)
+
+#         return [
+#                           {"role": "assistant", "content": full_reply}]
+
+#     except Exception as e:
+#         return [
+#                           {"role": "assistant", "content": f"⚠️ Error: {e}"}]
+
+# gradio_ui = gr.ChatInterface(
+#     fn=gradio_chat,
+#     type="messages",    
+#     title="Privacy protecting Chatbot (with Sensitive Data Protection)",
+#     description="Chat with Mistral-7B-Instruct-v0.3 safely via Hugging Face Inference API.\n\n⚠️ Sensitive data like emails, phone numbers, and card numbers will be redacted and flagged.",
+# )
+
+# # Mount Gradio directly into FastAPI
+# app = gr.mount_gradio_app(app, gradio_ui, path="/gradio")
+
+
+
+
+
+
+
+# import re
+# from fastapi import FastAPI, Query
+# from fastapi.responses import RedirectResponse
+# from pydantic import BaseModel
+# from huggingface_hub import InferenceClient
+# import gradio as gr
+# from starlette.middleware.cors import CORSMiddleware
+# import os
+# import json
+# from datetime import datetime
+# from enum import Enum
+
+# # Hugging Face API token
+# HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+
+# # Hugging Face client
+# client = InferenceClient(token=HF_TOKEN)
+
+# LOG_FILE = "chatbot_history.json"
+
+# # ---------------------- Severity Levels ----------------------
+# class SeverityLevel(Enum):
+#     LOW = "🟢"
+#     MEDIUM = "🟡"
+#     HIGH = "🔴"
+
+# # ---------------------- Enhanced Sensitive Data Handler ----------------------
+# def redact_sensitive_data(text: str) -> tuple[str, list[dict]]:
+#     """Redacts sensitive data and returns (redacted_text, alerts with severity)."""
+#     alerts = []
+
+#     # 🔴 HIGH: Aadhaar (12 digits)
+#     if re.search(r"\b\d{12}\b", text):
+#         alerts.append({
+#             "severity": SeverityLevel.HIGH.value,
+#             "message": "Aadhaar number detected and redacted",
+#             "level": "HIGH"
+#         })
+#         text = re.sub(r"\b\d{12}\b", "[REDACTED_AADHAAR]", text)
+
+#     # 🔴 HIGH: PAN Card (ABCDE1234F format)
+#     if re.search(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", text):
+#         alerts.append({
+#             "severity": SeverityLevel.HIGH.value,
+#             "message": "PAN card detected and redacted",
+#             "level": "HIGH"
+#         })
+#         text = re.sub(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", "[REDACTED_PAN]", text)
+
+#     # 🔴 HIGH: Credit/Debit Card (13-19 digits with optional spaces/dashes)
+#     if re.search(r"\b(?:\d{4}[\s\-]?){3}\d{1,7}\b", text):
+#         alerts.append({
+#             "severity": SeverityLevel.HIGH.value,
+#             "message": "Card number detected and redacted",
+#             "level": "HIGH"
+#         })
+#         text = re.sub(r"\b(?:\d{4}[\s\-]?){3}\d{1,7}\b", "[REDACTED_CARD]", text)
+
+#     # 🔴 HIGH: CVV (3-4 digits preceded by cvv/cvc)
+#     if re.search(r"\b(?:cvv|cvc)\s*:?\s*\d{3,4}\b", text, re.IGNORECASE):
+#         alerts.append({
+#             "severity": SeverityLevel.HIGH.value,
+#             "message": "CVV detected and redacted",
+#             "level": "HIGH"
+#         })
+#         text = re.sub(r"\b(?:cvv|cvc)\s*:?\s*\d{3,4}\b", "[REDACTED_CVV]", text, flags=re.IGNORECASE)
+
+#     # 🟡 MEDIUM: Phone number (10 digits)
+#     if re.search(r"\b\d{10}\b", text):
+#         alerts.append({
+#             "severity": SeverityLevel.MEDIUM.value,
+#             "message": "Phone number detected and redacted",
+#             "level": "MEDIUM"
+#         })
+#         text = re.sub(r"\b\d{10}\b", "[REDACTED_PHONE]", text)
+
+#     # 🟡 MEDIUM: Email
+#     if re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text):
+#         alerts.append({
+#             "severity": SeverityLevel.MEDIUM.value,
+#             "message": "Email address detected and redacted",
+#             "level": "MEDIUM"
+#         })
+#         text = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[REDACTED_EMAIL]", text)
+
+#     # 🟡 MEDIUM: Address patterns (simplified)
+#     if re.search(r"\b\d{6}\b", text):
+#         alerts.append({
+#             "severity": SeverityLevel.MEDIUM.value,
+#             "message": "Postal code detected and redacted",
+#             "level": "MEDIUM"
+#         })
+#         text = re.sub(r"\b\d{6}\b", "[REDACTED_PINCODE]", text)
+
+#     return text, alerts
+
+# def mask_sensitive_data(text: str) -> str:
+#     """Mask sensitive data for logging (partial visibility)."""
+#     # Mask Aadhaar (123456789012 -> 123*****012)
+#     text = re.sub(r"\b(\d{3})\d{6}(\d{3})\b", r"\1******\2", text)
+
+#     # Mask PAN (ABCDE1234F -> ABC**1234*)
+#     text = re.sub(r"\b([A-Z]{3})[A-Z]{2}(\d{4})[A-Z]\b", r"\1**\2*", text)
+
+#     # Mask phone (9876543210 -> 987****210)
+#     text = re.sub(r"\b(\d{3})\d{4}(\d{3})\b", r"\1****\2", text)
+
+#     # Mask card (1234567890123456 -> 1234********3456)
+#     text = re.sub(r"\b(\d{4})\d{8}(\d{4})\b", r"\1********\2", text)
+
+#     # Mask email (john@gmail.com -> j***@gmail.com)
+#     text = re.sub(r"([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})",
+#                   r"\1***\2", text)
+
+#     return text
+
+# def log_interaction(prompt: str, answer: str, alerts: list[dict]):
+#     """Log interactions with masked data and severity information."""
+#     masked_prompt = mask_sensitive_data(prompt)
+#     masked_answer = mask_sensitive_data(answer)
+    
+#     record = {
+#         "timestamp": datetime.utcnow().isoformat(),
+#         "prompt": masked_prompt,
+#         "answer": masked_answer,
+#         "alerts": alerts,
+#         "severity_summary": {
+#             "high": sum(1 for a in alerts if a.get("level") == "HIGH"),
+#             "medium": sum(1 for a in alerts if a.get("level") == "MEDIUM"),
+#             "low": sum(1 for a in alerts if a.get("level") == "LOW")
+#         }
+#     }
+
+#     try:
+#         with open(LOG_FILE, "r", encoding="utf-8") as f:
+#             data = json.load(f)
+#     except (FileNotFoundError, json.JSONDecodeError):
+#         data = []
+
+#     data.append(record)
+
+#     with open(LOG_FILE, "w", encoding="utf-8") as f:
+#         json.dump(data, f, indent=4, ensure_ascii=False)
+
+# # ---------------------- FastAPI ----------------------
+# app = FastAPI(title="Privacy-Protected Chatbot API")
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# class ChatRequest(BaseModel):
+#     message: str
+
+# @app.get("/")
+# def root():
+#     return RedirectResponse(url="/gradio")
+
+# @app.get("/hello")
+# def hello():
+#     return {"reply": "Privacy-Protected Chatbot API is running."}
+
+# @app.post("/chat") 
+# def chat(request: ChatRequest):
+#     try:
+#         redacted_user_message, alerts = redact_sensitive_data(request.message)
+
+#         response = client.text_generation(
+#             model="mistralai/Mistral-7B-Instruct-v0.3",
+#             prompt=redacted_user_message,
+#             max_new_tokens=256,
+#             temperature=0.7
+#         )
+
+#         redacted_reply, reply_alerts = redact_sensitive_data(response)
+#         all_alerts = alerts + reply_alerts
+
+#         masked_user = mask_sensitive_data(request.message)
+#         masked_reply = mask_sensitive_data(response)
+#         log_interaction(masked_user, masked_reply, all_alerts)
+
+#         return {
+#             "reply": redacted_reply,
+#             "alerts": all_alerts,
+#             "severity_summary": {
+#                 "high": sum(1 for a in all_alerts if a.get("level") == "HIGH"),
+#                 "medium": sum(1 for a in all_alerts if a.get("level") == "MEDIUM")
+#             }
+#         }
+
+#     except Exception as e:
+#         return {"error": str(e)}
+
+# @app.get("/manifest.json")
+# def manifest():
+#     return {
+#         "name": "Privacy Chatbot",
+#         "short_name": "PrivacyBot",
+#         "start_url": "/",
+#         "display": "standalone",
+#         "background_color": "#0f172a",
+#         "theme_color": "#1e293b",
+#         "description": "AI Chatbot with Advanced Privacy Protection"
+#     }
+
+# # ---------------------- Gradio Interface ----------------------
+# def gradio_chat(message, history):
+#     try:
+#         user_message, alerts = redact_sensitive_data(message)
+        
+#         response = client.chat_completion(
+#             model="mistralai/Mistral-7B-Instruct-v0.3",
+#             messages=[{"role": "user", "content": user_message}],
+#             max_tokens=256,
+#             temperature=0.7
+#         )
+        
+#         reply = response.choices[0].message["content"]
+#         safe_reply, reply_alerts = redact_sensitive_data(reply)
+#         all_alerts = alerts + reply_alerts
+
+#         masked_user = mask_sensitive_data(message)
+#         masked_reply = mask_sensitive_data(reply)
+#         log_interaction(masked_user, masked_reply, all_alerts)
+        
+#         # Format alerts with severity - GREEN if no sensitive data
+#         if all_alerts:
+#             alert_badge = "\n\n<div style='background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #ef4444; margin-top: 12px;'>"
+#             alert_badge += "<strong>🔒 Privacy Alerts Detected:</strong><br/>"
+#             for alert in all_alerts:
+#                 color = "#dc2626" if alert['level'] == "HIGH" else "#f59e0b"
+#                 alert_badge += f"<span style='color: {color}; font-weight: 600;'>{alert['severity']} {alert['message']}</span><br/>"
+#             alert_badge += "</div>"
+#             full_reply = safe_reply + alert_badge
+#         else:
+#             # GREEN badge for safe queries
+#             full_reply = safe_reply
+#             full_reply += "\n\n<div style='background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #10b981; margin-top: 12px;'>"
+#             full_reply += "<strong style='color: #047857;'>🟢 No Sensitive Data Detected - Message is Safe</strong>"
+#             full_reply += "</div>"
+
+#         # Return properly formatted message list
+#         updated_history = history + [
+#             {"role": "user", "content": message},
+#             {"role": "assistant", "content": full_reply}
+#         ]
+#         return updated_history
+
+#     except Exception as e:
+#         updated_history = history + [
+#             {"role": "user", "content": message},
+#             {"role": "assistant", "content": f"⚠️ Error: {str(e)}"}
+#         ]
+#         return updated_history
+
+# # Enhanced CSS for modern, attractive UI
+# custom_css = """
+# @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+# * {
+#     font-family: 'Inter', sans-serif;
+# }
+
+# .gradio-container {
+#     max-width: 100% !important;
+#     padding: 0 !important;
+#     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+# }
+
+# .contain {
+#     max-width: 100% !important;
+# }
+
+# .main {
+#     background: white;
+#     border-radius: 16px;
+#     padding: 24px;
+#     margin: 20px;
+#     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+# }
+
+# #chatbot {
+#     border-radius: 12px;
+#     height: 70vh;
+#     border: 2px solid #e5e7eb;
+#     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+# }
+
+# .message-wrap {
+#     padding: 16px !important;
+#     margin: 8px 0 !important;
+# }
+
+# .message-wrap p {
+#     font-size: 16px !important;
+#     line-height: 1.6 !important;
+#     margin: 0 !important;
+# }
+
+# .user {
+#     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+#     color: white !important;
+#     border-radius: 16px 16px 4px 16px !important;
+#     font-size: 16px !important;
+# }
+
+# .bot {
+#     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+#     border: 1px solid #e2e8f0;
+#     border-radius: 16px 16px 16px 4px !important;
+#     font-size: 16px !important;
+# }
+
+# .user p, .bot p {
+#     font-size: 16px !important;
+#     line-height: 1.6 !important;
+# }
+
+# .message {
+#     font-size: 16px !important;
+# }
+
+# #chatbot .message-wrap .message {
+#     font-size: 16px !important;
+#     line-height: 1.6 !important;
+# }
+
+# #component-0 {
+#     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+#     color: white;
+#     padding: 24px;
+#     border-radius: 12px;
+#     margin-bottom: 20px;
+#     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+# }
+
+# #component-0 h1 {
+#     font-size: 32px;
+#     font-weight: 700;
+#     margin: 0;
+#     background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+#     -webkit-background-clip: text;
+#     -webkit-text-fill-color: transparent;
+#     background-clip: text;
+# }
+
+# label {
+#     font-weight: 600 !important;
+#     color: #1e293b !important;
+#     font-size: 14px !important;
+# }
+
+# .input-wrap textarea {
+#     border: 2px solid #e5e7eb !important;
+#     border-radius: 10px !important;
+#     padding: 12px !important;
+#     font-size: 15px !important;
+#     transition: all 0.3s ease !important;
+# }
+
+# .input-wrap textarea:focus {
+#     border-color: #667eea !important;
+#     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+# }
+
+# .primary {
+#     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+#     border: none !important;
+#     color: white !important;
+#     font-weight: 600 !important;
+#     padding: 12px 32px !important;
+#     border-radius: 10px !important;
+#     transition: all 0.3s ease !important;
+#     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+# }
+
+# .primary:hover {
+#     transform: translateY(-2px) !important;
+#     box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5) !important;
+# }
+
+# button {
+#     border-radius: 10px !important;
+#     font-weight: 600 !important;
+#     transition: all 0.3s ease !important;
+# }
+
+# button:not(.primary) {
+#     background: #f1f5f9 !important;
+#     color: #475569 !important;
+#     border: 2px solid #e2e8f0 !important;
+# }
+
+# button:not(.primary):hover {
+#     background: #e2e8f0 !important;
+#     border-color: #cbd5e1 !important;
+# }
+
+# footer {
+#     display: none !important;
+# }
+
+# .wrap {
+#     border-radius: 12px !important;
+# }
+
+# #component-2 {
+#     margin-top: 20px;
+# }
+# """
+
+# # Modern, attractive Gradio interface
+# with gr.Blocks(css=custom_css, theme=gr.themes.Soft(
+#     primary_hue="blue",
+#     secondary_hue="purple",
+# ), title="🔒 Privacy-Protected Chatbot") as gradio_ui:
+    
+#     gr.HTML("""
+#         <div style='text-align: center; padding: 20px;'>
+#             <h1 style='font-size: 42px; font-weight: 800; margin: 0; 
+#                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+#                        -webkit-background-clip: text;
+#                        -webkit-text-fill-color: transparent;
+#                        background-clip: text;'>
+#                 🔒 Privacy Shield AI
+#             </h1>
+#             <p style='font-size: 16px; color: #64748b; margin-top: 8px; font-weight: 500;'>
+#                 Chatbot with Real-Time Sensitive Data Protection
+#             </p>
+#         </div>
+#     """)
+    
+#     chatbot = gr.Chatbot(
+#         type="messages",
+#         height=550,
+#         show_copy_button=True,
+#         render_markdown=True,
+#         bubble_full_width=False
+#     )
+    
+#     with gr.Row():
+#         msg = gr.Textbox(
+#             label="Your Message",
+#             placeholder="💬 Type your message here... (All sensitive data is automatically protected)",
+#             lines=2,
+#             scale=5,
+#             show_label=False
+#         )
+    
+#     with gr.Row():
+#         send_btn = gr.Button("🚀 Send Message", variant="primary", scale=2, size="lg")
+#         clear_btn = gr.Button("🗑️ Clear Chat", scale=1, size="lg")
+    
+#     gr.HTML("""
+#         <div style='text-align: center; padding: 16px; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
+#                     border-radius: 10px; margin-top: 20px; border: 1px solid #cbd5e1;'>
+#             <div style='display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;'>
+#                 <div>
+#                     <span style='font-size: 24px;'>🔴</span>
+#                     <strong style='color: #dc2626; margin-left: 8px;'>HIGH</strong>
+#                     <p style='color: #64748b; font-size: 13px; margin: 4px 0 0 0;'>Aadhaar, PAN, Cards, CVV</p>
+#                 </div>
+#                 <div>
+#                     <span style='font-size: 24px;'>🟡</span>
+#                     <strong style='color: #f59e0b; margin-left: 8px;'>MEDIUM</strong>
+#                     <p style='color: #64748b; font-size: 13px; margin: 4px 0 0 0;'>Email, Phone, Postal Code</p>
+#                 </div>
+#                 <div>
+#                     <span style='font-size: 24px;'>🟢</span>
+#                     <strong style='color: #10b981; margin-left: 8px;'>SAFE</strong>
+#                     <p style='color: #64748b; font-size: 13px; margin: 4px 0 0 0;'>No Sensitive Data</p>
+#                 </div>
+#             </div>
+#         </div>
+#     """)
+    
+#     # Event handlers
+#     def submit_message(message, history):
+#         return "", gradio_chat(message, history)
+    
+#     def clear_chat():
+#         return []
+    
+#     msg.submit(submit_message, [msg, chatbot], [msg, chatbot])
+#     send_btn.click(submit_message, [msg, chatbot], [msg, chatbot])
+#     clear_btn.click(clear_chat, None, chatbot)
+
+# # Mount Gradio to FastAPI
+# app = gr.mount_gradio_app(app, gradio_ui, path="/gradio")
+
+
+
+
+
+
+
+
+
+
+import re
+from fastapi import FastAPI, Query
+from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
+from huggingface_hub import InferenceClient
+import gradio as gr
+from starlette.middleware.cors import CORSMiddleware
+import os
+import json
+from datetime import datetime
+from enum import Enum
+
+# # Hugging Face API token
+HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+
+# # Hugging Face client
+# # client = InferenceClient(token=HF_TOKEN)
+client = InferenceClient(
+    model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+    token=HF_TOKEN
+)
+
+# client = InferenceClient(token=HF_TOKEN, provider="hf-inference")
+
+
+LOG_FILE = "chatbot_history.json"
+
+# # ---------------------- Severity Levels ----------------------
+class SeverityLevel(Enum):
+    LOW = "🟢"
+    MEDIUM = "🟡"
+    HIGH = "🔴"
+
+# # ---------------------- Enhanced Sensitive Data Handler ----------------------
+def redact_sensitive_data(text: str):
+# -> tuple[str, list[dict]]:
+#     """Redacts sensitive data and returns (redacted_text, alerts with severity)."""
+    alerts = []
+
+    # 🔴 HIGH: Aadhaar (12 digits)
+    if re.search(r"\b\d{12}\b", text):
+        alerts.append({
+            "severity": SeverityLevel.HIGH.value,
+            "message": "Aadhaar number detected and redacted",
+            "level": "HIGH"
+        })
+        text = re.sub(r"\b\d{12}\b", "[REDACTED_AADHAAR]", text)
+
+    # 🔴 HIGH: PAN Card (ABCDE1234F format)
+    if re.search(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", text):
+        alerts.append({
+            "severity": SeverityLevel.HIGH.value,
+            "message": "PAN card detected and redacted",
+            "level": "HIGH"
+        })
+        text = re.sub(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", "[REDACTED_PAN]", text)
+
+    # 🔴 HIGH: Credit/Debit Card (13-19 digits with optional spaces/dashes)
+    if re.search(r"\b(?:\d{4}[\s\-]?){3}\d{1,7}\b", text):
+        alerts.append({
+            "severity": SeverityLevel.HIGH.value,
+            "message": "Card number detected and redacted",
+            "level": "HIGH"
+        })
+        text = re.sub(r"\b(?:\d{4}[\s\-]?){3}\d{1,7}\b", "[REDACTED_CARD]", text)
+
+    # 🔴 HIGH: CVV (3-4 digits preceded by cvv/cvc)
+    if re.search(r"\b(?:cvv|cvc)\s*:?\s*\d{3,4}\b", text, re.IGNORECASE):
+        alerts.append({
+            "severity": SeverityLevel.HIGH.value,
+            "message": "CVV detected and redacted",
+            "level": "HIGH"
+        })
+        text = re.sub(r"\b(?:cvv|cvc)\s*:?\s*\d{3,4}\b", "[REDACTED_CVV]", text, flags=re.IGNORECASE)
+
+    # 🟡 MEDIUM: Phone number (10 digits)
+    if re.search(r"\b\d{10}\b", text):
+        alerts.append({
+            "severity": SeverityLevel.MEDIUM.value,
+            "message": "Phone number detected and redacted",
+            "level": "MEDIUM"
+        })
+        text = re.sub(r"\b\d{10}\b", "[REDACTED_PHONE]", text)
+
+    # 🟡 MEDIUM: Email
+    if re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text):
+        alerts.append({
+            "severity": SeverityLevel.MEDIUM.value,
+            "message": "Email address detected and redacted",
+            "level": "MEDIUM"
+        })
+        text = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[REDACTED_EMAIL]", text)
+
+    # 🟡 MEDIUM: Address patterns (simplified)
+    if re.search(r"\b\d{6}\b", text):
+        alerts.append({
+            "severity": SeverityLevel.MEDIUM.value,
+            "message": "Postal code detected and redacted",
+            "level": "MEDIUM"
+        })
+        text = re.sub(r"\b\d{6}\b", "[REDACTED_PINCODE]", text)
+
+    return text, alerts
+
+def mask_sensitive_data(text: str):
+    # -> str:
+#     """Mask sensitive data for logging (partial visibility)."""
+#     # Mask Aadhaar (123456789012 -> 123*****012)
+    text = re.sub(r"\b(\d{3})\d{6}(\d{3})\b", r"\1******\2", text)
+
+#     # Mask PAN (ABCDE1234F -> ABC**1234*)
+    text = re.sub(r"\b([A-Z]{3})[A-Z]{2}(\d{4})[A-Z]\b", r"\1**\2*", text)
+
+#     # Mask phone (9876543210 -> 987****210)
+    text = re.sub(r"\b(\d{3})\d{4}(\d{3})\b", r"\1****\2", text)
+
+#     # Mask card (1234567890123456 -> 1234********3456)
+    text = re.sub(r"\b(\d{4})\d{8}(\d{4})\b", r"\1********\2", text)
+
+#     # Mask email (john@gmail.com -> j***@gmail.com)
+    text = re.sub(r"([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})",
+                  r"\1***\2", text)
+
+    return text
+
+def log_interaction(text:str):
+# (prompt: str, answer: str, alerts: list[dict])
+#     """Log interactions with masked data and severity information."""
+#     masked_prompt = mask_sensitive_data(prompt)
+#     masked_answer = mask_sensitive_data(answer)
+    
+    record = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "prompt": masked_prompt,
+        "answer": masked_answer,
+        "alerts": alerts,
+        "severity_summary": {
+            "high": sum(1 for a in alerts if a.get("level") == "HIGH"),
+            "medium": sum(1 for a in alerts if a.get("level") == "MEDIUM"),
+            "low": sum(1 for a in alerts if a.get("level") == "LOW")
+        }
+    }
+
+    try:
+        with open(LOG_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = []
+
+    data.append(record)
+
+    with open(LOG_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+# # ---------------------- FastAPI ----------------------
+# app = FastAPI(title="Privacy-Protected Chatbot API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class ChatRequest(BaseModel):
+    message: str
+
+@app.get("/")
+def root():
+    return RedirectResponse(url="/gradio")
+
+@app.get("/hello")
+def hello():
+    return {"reply": "Privacy-Protected Chatbot API is running."}
+
+@app.post("/chat") 
+# def chat(request: ChatRequest):
+#     try:
+#         redacted_user_message, alerts = redact_sensitive_data(request.message)
+
+#         response = client.chat_completion(
+#             messages=[{"role": "user", "content": redacted}],
+#             max_tokens=256,
+#             temperature=0.7
+#         )
+
+#         redacted_reply, reply_alerts = redact_sensitive_data(response)
+#         all_alerts = alerts + reply_alerts
+
+#         masked_user = mask_sensitive_data(request.message)
+#         masked_reply = mask_sensitive_data(response)
+#         log_interaction(masked_user, masked_reply, all_alerts)
+
+#         return {
+#             "reply": redacted_reply,
+#             "alerts": all_alerts,
+#             "severity_summary": {
+#                 "high": sum(1 for a in all_alerts if a.get("level") == "HIGH"),
+#                 "medium": sum(1 for a in all_alerts if a.get("level") == "MEDIUM")
+#             }
+#         }
+
+#     except Exception as e:
+#         return {"error": str(e)}
+def chat(request: ChatRequest):
+    try:
+        # Redact user input
+        redacted_user_message, alerts = redact_sensitive_data(request.message)
+
+        # Call HF chat completion correctly
+        response = client.chat_completion(
+            model="meta-llama/Llama-3.1-8B-Instruct",
+            messages=[{"role": "user", "content": redacted_user_message}],
+            max_tokens=256,
+            temperature=0.7
+        )
+
+        # Extract assistant message
+        assistant_text = response.choices[0].message["content"]
+
+        # Redact assistant reply
+        redacted_reply, reply_alerts = redact_sensitive_data(assistant_text)
+        all_alerts = alerts + reply_alerts
+
+        # Mask before logging
+        masked_user = mask_sensitive_data(request.message)
+        masked_reply = mask_sensitive_data(assistant_text)
+
+        log_interaction(masked_user, masked_reply, all_alerts)
+
+        return {
+            "reply": redacted_reply,
+            "alerts": all_alerts,
+            "severity_summary": {
+                "high": sum(1 for a in all_alerts if a.get("level") == "HIGH"),
+                "medium": sum(1 for a in all_alerts if a.get("level") == "MEDIUM")
+            }
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/manifest.json")
+def manifest():
+    return {
+        "name": "Privacy Chatbot",
+        "short_name": "PrivacyBot",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#0f172a",
+        "theme_color": "#1e293b",
+        "description": "AI Chatbot with Advanced Privacy Protection"
+    }
+
+# # ---------------------- Gradio Interface ----------------------
+# # def gradio_chat(message, history, strict_mode, enable_logging, sensitivity_level):
+# #     try:
+# #         # Check for sensitive data first
+# #         user_message, alerts = redact_sensitive_data(message)
+        
+# #         # In strict mode, block messages with HIGH severity alerts
+# #         if strict_mode and any(alert['level'] == 'HIGH' for alert in alerts):
+# #             blocked_message = """
+# #             <div style='background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #ef4444;'>
+# #                 <strong style='color: #dc2626;'>🚫 Message Blocked - Strict Privacy Mode</strong><br/>
+# #                 <p style='color: #991b1b; margin-top: 8px;'>Your message contains HIGH-risk sensitive data and has been blocked for your protection.</p>
+# #                 <p style='color: #7f1d1d; margin-top: 8px; font-size: 14px;'><strong>Detected:</strong></p>
+# #             """
+# #             for alert in alerts:
+# #                 if alert['level'] == 'HIGH':
+# #                     blocked_message += f"<span style='color: #dc2626;'>{alert['severity']} {alert['message']}</span><br/>"
+# #             blocked_message += "<p style='color: #7f1d1d; margin-top: 8px; font-size: 13px;'><em>💡 Tip: Disable strict mode in settings to allow redacted messages.</em></p>"
+# #             blocked_message += "</div>"
+            
+# #             updated_history = history + [
+# #                 {"role": "user", "content": message},
+# #                 {"role": "assistant", "content": blocked_message}
+# #             ]
+# #             return updated_history
+        
+# #         # Proceed with normal chat (relaxed mode or no HIGH alerts)
+# #         response = client.chat_completion(
+# #             model="mistralai/Mistral-7B-Instruct-v0.3",
+# #             messages=[{"role": "user", "content": user_message}],
+# #             max_tokens=256,
+# #             temperature=0.7
+# #         )
+# #         # response = client.chat_completion(
+# #         #     model="mistralai/Mistral-7B-Instruct-v0.3",
+# #         #     provider="hf-inference",   # force correct working provider
+# #         #     messages=[{"role": "user", "content": user_message}],
+# #         #     max_tokens=256,
+# #         #     temperature=0.7
+# #         # )
+# #         # response = client.chat_completion(
+# #         #     model="mistralai/Mistral-7B-Instruct-v0.3",
+# #         #     messages=[{"role": "user", "content": user_message}],
+# #         #     max_tokens=256,
+# #         #     temperature=0.7
+# #         # )
+# #         # response = client.chat_completion(
+# #         #     model="mistralai/Mistral-7B-Instruct-v0.3",
+# #         #     messages=[{"role": "user", "content": "hello"}]
+# #         # )
+
+
+# #         # response = client.chat_completion(
+# #         #     model="mistralai/Mistral-7B-Instruct-v0.3",
+# #         #     messages=[{"role": "user", "content": user_message}],
+# #         #     max_tokens=256,
+# #         #     temperature=0.7
+# #         # )
+        
+# #         # from huggingface_hub.inference._client import ChatCompletionOutput
+
+# #         # response: ChatCompletionOutput = client.chat_completion(
+# #         #     model="mistralai/Mistral-7B-Instruct-v0.3",
+# #         #     messages=[{"role": "user", "content": user_message}],
+# #         #     max_tokens=256,
+# #         # )
+
+
+# #         reply = response.choices[0].message["content"]
+# #         safe_reply, reply_alerts = redact_sensitive_data(reply)
+# #         all_alerts = alerts + reply_alerts
+
+# #         # Log interaction only if logging is enabled
+# #         if enable_logging:
+# #             masked_user = mask_sensitive_data(message)
+# #             masked_reply = mask_sensitive_data(reply)
+# #             log_interaction(masked_user, masked_reply, all_alerts)
+        
+# #         # Format alerts with severity - GREEN if no sensitive data
+# #         if all_alerts:
+# #             alert_badge = "\n\n<div style='background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #ef4444; margin-top: 12px;'>"
+# #             alert_badge += "<strong>🔒 Privacy Alerts Detected:</strong><br/>"
+# #             for alert in all_alerts:
+# #                 color = "#dc2626" if alert['level'] == "HIGH" else "#f59e0b"
+# #                 alert_badge += f"<span style='color: {color}; font-weight: 600;'>{alert['severity']} {alert['message']}</span><br/>"
+# #             alert_badge += f"<p style='color: #64748b; font-size: 12px; margin-top: 8px;'>Mode: {'🔒 Strict (Redacted)' if not strict_mode else '🔒 Strict'} | Sensitivity: {sensitivity_level}</p>"
+# #             alert_badge += "</div>"
+# #             full_reply = safe_reply + alert_badge
+# #         else:
+# #             # GREEN badge for safe queries
+# #             full_reply = safe_reply
+# #             full_reply += "\n\n<div style='background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #10b981; margin-top: 12px;'>"
+# #             full_reply += "<strong style='color: #047857;'>🟢 No Sensitive Data Detected - Message is Safe</strong>"
+# #             full_reply += f"<p style='color: #065f46; font-size: 12px; margin-top: 4px;'>Mode: {'🔓 Relaxed' if not strict_mode else '🔒 Strict'} | Sensitivity: {sensitivity_level}</p>"
+# #             full_reply += "</div>"
+
+# #         # Return properly formatted message list
+# #         updated_history = history + [
+# #             {"role": "user", "content": message},
+# #             {"role": "assistant", "content": full_reply}
+# #         ]
+# #         return updated_history
+
+# #     except Exception as e:
+# #         updated_history = history + [
+# #             {"role": "user", "content": message},
+# #             {"role": "assistant", "content": f"⚠️ Error: {str(e)}"}
+# #         ]
+# #         return updated_history
+
+
+# def gradio_chat(message, history, strict_mode, enable_logging, sensitivity_level):
+#     try:
+#         # Sensitive data check
+#         user_message, alerts = redact_sensitive_data(message)
+
+#         # Strict-mode blocking
+#         if strict_mode and any(a["level"] == "HIGH" for a in alerts):
+#             blocked = "<b>🚫 Blocked (Strict Mode)</b><br>High-risk sensitive data detected."
+#             history.append((message, blocked))
+#             return history
+
+#         # REAL chat completion (no conversational task!)
+#         response = client.chat_completion(
+#             model="mistralai/Mistral-7B-Instruct-v0.3",
+#             messages=[
+#                 {"role": "system", "content": "You are a helpful assistant."},
+#                 {"role": "user", "content": user_message}
+#             ],
+#             max_tokens=256,
+#             temperature=0.7
+#         )
+
+#         reply = response.choices[0].message["content"]
+
+#         # Redact reply
+#         safe_reply, reply_alerts = redact_sensitive_data(reply)
+#         all_alerts = alerts + reply_alerts
+
+#         # Logging
+#         if enable_logging:
+#             log_interaction(
+#                 mask_sensitive_data(message),
+#                 mask_sensitive_data(reply),
+#                 all_alerts
+#             )
+
+#         # Return history correct format
+#         history.append((message, safe_reply))
+#         return history
+
+#     except Exception as e:
+#         history.append((message, f"⚠️ Error: {str(e)}"))
+#         return history
+
+def gradio_chat(message, history, strict_mode, enable_logging, sensitivity_level):
+    try:
+        # 1. Detect + redact sensitive data first
+        user_message, alerts = redact_sensitive_data(message)
+
+        # 2. Strict mode → block HIGH severity messages
+        if strict_mode and any(a["level"] == "HIGH" for a in alerts):
+            blocked_html = """
+            <div style='background:#fee2e2;padding:12px;border-left:4px solid #ef4444;border-radius:8px;'>
+                <b style='color:#b91c1c;'>🚫 STRICT MODE BLOCKED MESSAGE</b><br>
+                High-risk sensitive data detected. Message was not sent.
+            </div>
+            """
+            history.append({"role": "assistant", "content": blocked_html})
+            return history
+
+        # 3. Safe → send to HF inference model (works only with Llama-3.1 etc.)
+        response = client.chat_completion(
+            model="meta-llama/Llama-3.1-8B-Instruct",   # ⭐ works with chat_completion
+            messages=[
+                {"role": "system", "content": "You are a safe and helpful assistant."},
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=256,
+            temperature=0.7
+        )
+
+        reply = response.choices[0].message["content"]
+
+        # 4. Redact the model's reply too
+        safe_reply, reply_alerts = redact_sensitive_data(reply)
+        all_alerts = alerts + reply_alerts
+
+        # 5. Logging only if enabled
+        if enable_logging:
+            log_interaction(
+                mask_sensitive_data(message),
+                mask_sensitive_data(reply),
+                all_alerts
+            )
+
+        # 6. Add alert badge if any sensitive data was detected
+        if all_alerts:
+            badge = "<br><div style='background:#fff3cd;padding:10px;border-left:4px solid #facc15;border-radius:8px;'>"
+            badge += "<b>🔒 Privacy Alerts:</b><br>"
+            for a in all_alerts:
+                color = "#dc2626" if a["level"] == "HIGH" else "#d97706"
+                badge += f"<span style='color:{color};'>{a['severity']} {a['message']}</span><br>"
+            badge += "</div>"
+            final_reply = safe_reply + badge
+        else:
+            # green badge
+            final_reply = safe_reply + """
+            <br><div style='background:#d1fae5;padding:10px;border-left:4px solid #10b981;border-radius:8px;'>
+                <b style='color:#047857;'>🟢 No Sensitive Data Detected</b>
+            </div>
+            """
+
+        # 7. Return final formatted message
+        history.append({"role": "assistant", "content": final_reply})
+        return history
+
+    except Exception as e:
+        error_msg = f"<div style='color:red;'><b>⚠️ Error:</b> {str(e)}</div>"
+        history.append({"role": "assistant", "content": error_msg})
+        return history
+
+def update_settings(strict_mode, enable_logs, sensitivity_level):
+    mode_text = "🔒 Strict Mode (Blocks HIGH-risk data)" if strict_mode else "🔓 Relaxed Mode (Redacts data)"
+    settings_msg = f"""
+    <div style='background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #10b981;'>
+        <strong style='color: #047857;'>✅ Settings Updated Successfully!</strong><br/>
+        <p style='color: #065f46; margin-top: 8px;'>
+        🔐 Privacy Mode: <strong>{mode_text}</strong><br/>
+        📝 Logging: <strong>{'Enabled' if enable_logs else 'Disabled'}</strong><br/>
+        🎚️ Sensitivity: <strong>{sensitivity_level}</strong>
+        </p>
+    </div>
+    """
+    return settings_msg
+
+# # Enhanced CSS for modern, attractive UI
+custom_css = """
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+.gradio-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.contain {
+    max-width: 100% !important;
+}
+
+.main {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+#chatbot {
+    border-radius: 12px;
+    height: 70vh;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.message-wrap {
+    padding: 16px !important;
+    margin: 8px 0 !important;
+}
+
+.message-wrap p {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+}
+
+.user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border-radius: 16px 16px 4px 16px !important;
+    font-size: 16px !important;
+}
+
+.bot {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px 16px 16px 4px !important;
+    font-size: 16px !important;
+}
+
+.user p, .bot p {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+}
+
+.message {
+    font-size: 16px !important;
+}
+
+#chatbot .message-wrap .message {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+}
+
+#component-0 {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+#component-0 h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+label {
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    font-size: 14px !important;
+}
+
+.input-wrap textarea {
+    border: 2px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    padding: 12px !important;
+    font-size: 15px !important;
+    transition: all 0.3s ease !important;
+}
+
+.input-wrap textarea:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 12px 32px !important;
+    border-radius: 10px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+.primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5) !important;
+}
+
+button {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+button:not(.primary) {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 2px solid #e2e8f0 !important;
+}
+
+button:not(.primary):hover {
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+}
+
+footer {
+    display: none !important;
+}
+
+.wrap {
+    border-radius: 12px !important;
+}
+
+#component-2 {
+    margin-top: 20px;
+}
+
+.settings-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+}
+
+.settings-button:hover {
+    transform: scale(1.1) rotate(90deg) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6) !important;
+}
+"""
+
+# Modern, attractive Gradio interface
+with gr.Blocks(css=custom_css, theme=gr.themes.Soft(
+    primary_hue="blue",
+    secondary_hue="purple",
+), title="🔒 Privacy-Protected Chatbot") as gradio_ui:
+    
+    # Settings state
+    settings_visible = gr.State(False)
+    
+    gr.HTML("""
+        <div style='text-align: center; padding: 20px;'>
+            <h1 style='font-size: 42px; font-weight: 800; margin: 0; 
+                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                       -webkit-background-clip: text;
+                       -webkit-text-fill-color: transparent;
+                       background-clip: text;'>
+                🔒 Privacy Shield AI
+            </h1>
+            <p style='font-size: 16px; color: #64748b; margin-top: 8px; font-weight: 500;'>
+                Enterprise-Grade Chatbot with Real-Time Sensitive Data Protection
+            </p>
+        </div>
+    """)
+    
+    with gr.Row():
+        with gr.Column(scale=5):
+            chatbot = gr.Chatbot(
+                type="messages",
+                height=550,
+                show_copy_button=True,
+                render_markdown=True,
+                bubble_full_width=False
+            )
+            
+            with gr.Row():
+                msg = gr.Textbox(
+                    label="Your Message",
+                    placeholder="💬 Type your message here... (All sensitive data is automatically protected)",
+                    lines=2,
+                    scale=5,
+                    show_label=False
+                )
+            
+            with gr.Row():
+                send_btn = gr.Button("🚀 Send Message", variant="primary", scale=2, size="lg")
+                clear_btn = gr.Button("🗑️ Clear Chat", scale=1, size="lg")
+        
+        with gr.Column(scale=1, visible=False) as settings_panel:
+            gr.Markdown("### ⚙️ Settings")
+            
+            strict_privacy = gr.Checkbox(
+                label="🔒 Strict Privacy Mode",
+                value=False,
+                info="Block messages with HIGH-risk sensitive data"
+            )
+            
+            gr.Markdown("""
+            <div style='background: #fef3c7; padding: 8px; border-radius: 6px; margin: 10px 0; font-size: 12px;'>
+                <strong>🔒 Strict Mode:</strong> Blocks messages containing Aadhaar, PAN, Cards, CVV<br/>
+                <strong>🔓 Relaxed Mode:</strong> Allows messages but redacts sensitive data
+            </div>
+            """)
+            
+            enable_logging = gr.Checkbox(
+                label="📝 Enable Logging",
+                value=True,
+                info="Save conversation history to file"
+            )
+            
+            sensitivity_level = gr.Radio(
+                choices=["Low", "Medium", "High"],
+                value="High",
+                label="🎚️ Sensitivity Level",
+                info="Detection strictness (affects future updates)"
+            )
+            
+            gr.Markdown("---")
+            
+            save_settings_btn = gr.Button("💾 Save Settings", variant="primary", size="sm")
+            
+            settings_output = gr.HTML(
+                value="",
+                visible=False
+            )
+    
+    # Settings toggle button (top right)
+    settings_btn = gr.Button(
+        "⚙️",
+        size="sm",
+        elem_classes="settings-button"
+    )
+    
+    gr.HTML("""
+        <div style='text-align: center; padding: 16px; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
+                    border-radius: 10px; margin-top: 20px; border: 1px solid #cbd5e1;'>
+            <div style='display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;'>
+                <div>
+                    <span style='font-size: 24px;'>🔴</span>
+                    <strong style='color: #dc2626; margin-left: 8px;'>HIGH</strong>
+                    <p style='color: #64748b; font-size: 13px; margin: 4px 0 0 0;'>Aadhaar, PAN, Cards, CVV</p>
+                </div>
+                <div>
+                    <span style='font-size: 24px;'>🟡</span>
+                    <strong style='color: #f59e0b; margin-left: 8px;'>MEDIUM</strong>
+                    <p style='color: #64748b; font-size: 13px; margin: 4px 0 0 0;'>Email, Phone, Postal Code</p>
+                </div>
+                <div>
+                    <span style='font-size: 24px;'>🟢</span>
+                    <strong style='color: #10b981; margin-left: 8px;'>SAFE</strong>
+                    <p style='color: #64748b; font-size: 13px; margin: 4px 0 0 0;'>No Sensitive Data</p>
+                </div>
+            </div>
+        </div>
+    """)
+    
+    # Event handlers
+    def submit_message(message, history, strict, logging, sensitivity):
+        return "", gradio_chat(message, history, strict, logging, sensitivity)
+    
+    def clear_chat():
+        return []
+    
+    def toggle_settings(current_state):
+        return not current_state, gr.update(visible=not current_state)
+    
+    def save_settings(strict, logging, sensitivity):
+        msg = update_settings(strict, logging, sensitivity)
+        return gr.update(value=msg, visible=True)
+    
+    msg.submit(submit_message, [msg, chatbot, strict_privacy, enable_logging, sensitivity_level], [msg, chatbot])
+    send_btn.click(submit_message, [msg, chatbot, strict_privacy, enable_logging, sensitivity_level], [msg, chatbot])
+    clear_btn.click(clear_chat, None, chatbot)
+    
+    settings_btn.click(
+        toggle_settings,
+        inputs=[settings_visible],
+        outputs=[settings_visible, settings_panel]
+    )
+    
+    save_settings_btn.click(
+        save_settings,
+        inputs=[strict_privacy, enable_logging, sensitivity_level],
+        outputs=[settings_output]
+    )
+
+# # Mount Gradio to FastAPI
+app = gr.mount_gradio_app(app, gradio_ui, path="/gradio")
+
+
+
+
+
+
+
+# import re
+# from fastapi import FastAPI
+# from fastapi.responses import RedirectResponse
+# from pydantic import BaseModel
+# from huggingface_hub import InferenceClient
+# import gradio as gr
+# from starlette.middleware.cors import CORSMiddleware
+# import os, json
+# from datetime import datetime
+
+# # ---------------------------
+# # HF CLIENT (WORKING MODEL)
+# # ---------------------------
+# print("HF_TOKEN present?:", bool(os.getenv("HUGGINGFACE_TOKEN")))
+# print("HF_TOKEN value:", os.getenv("HUGGINGFACE_TOKEN"))  # remove after verifying
+
+# HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+
+# client = InferenceClient(
+#     model="HuggingFaceH4/zephyr-7b-beta",
+#     token=HF_TOKEN
+# )
+
+# LOG_FILE = "chatbot_history.json"
+
+# # ------------------------------------
+# # REDACTION + LOGGING UTILITIES
+# # ------------------------------------
+# def redact_sensitive(text):
+#     alerts = []
+
+#     # Aadhaar
+#     if re.search(r"\b\d{12}\b", text):
+#         alerts.append("🔴 Aadhaar detected and redacted")
+#         text = re.sub(r"\b\d{12}\b", "[REDACTED_AADHAAR]", text)
+
+#     # Phone
+#     if re.search(r"\b\d{10}\b", text):
+#         alerts.append("🟡 Phone detected and redacted")
+#         text = re.sub(r"\b\d{10}\b", "[REDACTED_PHONE]", text)
+
+#     # Email
+#     if re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text):
+#         alerts.append("🟡 Email detected and redacted")
+#         text = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[REDACTED_EMAIL]", text)
+
+#     return text, alerts
+
+# def mask_for_logs(text):
+#     # mask emails
+#     text = re.sub(r"([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@.*)",
+#                   r"\1***\2", text)
+
+#     # mask phone
+#     text = re.sub(r"\b(\d{3})\d{4}(\d{3})", r"\1****\2", text)
+
+#     return text
+
+# def log_interaction(user, bot):
+#     record = {
+#         "timestamp": datetime.utcnow().isoformat(),
+#         "user": mask_for_logs(user),
+#         "bot": mask_for_logs(bot)
+#     }
+
+#     try:
+#         with open(LOG_FILE, "r") as f:
+#             data = json.load(f)
+#     except:
+#         data = []
+
+#     data.append(record)
+
+#     with open(LOG_FILE, "w") as f:
+#         json.dump(data, f, indent=4)
+
+# # ---------------------------
+# # FASTAPI
+# # ---------------------------
+# app = FastAPI()
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# class ChatReq(BaseModel):
+#     message: str
+
+# @app.get("/")
+# def home():
+#     return RedirectResponse("/gradio")
+
+# @app.post("/chat")
+# def api_chat(request: ChatReq):
+#     redacted, alerts = redact_sensitive(request.message)
+
+#     # Chat completion
+#     response = client.chat_completion(
+#         messages=[{"role": "user", "content": redacted}],
+#         max_tokens=200,
+#         temperature=0.7
+#     )
+
+#     reply = response.choices[0].message["content"]
+
+#     log_interaction(request.message, reply)
+
+#     return {"reply": reply, "alerts": alerts}
+
+# # ---------------------------
+# # GRADIO CHAT UI
+# # ---------------------------
+# def gradio_chat(message, history):
+#     redacted, alerts = redact_sensitive(message)
+
+#     response = client.chat_completion(
+#         messages=[{"role": "user", "content": redacted}],
+#         max_tokens=200,
+#         temperature=0.7
+#     )
+
+#     reply = response.choices[0].message["content"]
+
+#     history.append((message, reply))
+#     log_interaction(message, reply)
+#     return history
+
+# with gr.Blocks() as interface:
+#     gr.Markdown("## 🔒 Privacy-Protected Chatbot (Zephyr 7B)")
+#     chatbot = gr.Chatbot()
+#     msg = gr.Textbox(label="Message")
+#     send = gr.Button("Send")
+
+#     send.click(gradio_chat, [msg, chatbot], chatbot)
+
+# app = gr.mount_gradio_app(app, interface, path="/gradio")
+
+
+
+
+
+
+
+
+
+
+
+
+# import re
+# import os
+# import json
+# from enum import Enum
+# from datetime import datetime
+
+# import gradio as gr
+# from fastapi import FastAPI
+# from fastapi.responses import RedirectResponse
+# from starlette.middleware.cors import CORSMiddleware
+# from pydantic import BaseModel
+# from huggingface_hub import InferenceClient
+
+# # ---------------------------------------------------------
+# #               HUGGING FACE CLIENT (HF-INFERENCE)
+# # ---------------------------------------------------------
+# HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+
+# client = InferenceClient(
+#     model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+#     token=HF_TOKEN
+# )
+
+# # ---------------------------------------------------------
+# #               LOG FILE
+# # ---------------------------------------------------------
+# LOG_FILE = "chat_logs.json"
+
+# # ---------------------------------------------------------
+# #               SEVERITY LEVELS
+# # ---------------------------------------------------------
+# class Severity(Enum):
+#     SAFE = "🟢"
+#     MEDIUM = "🟡"
+#     HIGH = "🔴"
+
+# # ---------------------------------------------------------
+# #      REDACTION + SEVERITY DETECTION ENGINE
+# # ---------------------------------------------------------
+# def redact_sensitive(text: str):
+#     alerts = []
+
+#     # Aadhaar
+#     if re.search(r"\b\d{12}\b", text):
+#         alerts.append({"level": "HIGH", "severity": Severity.HIGH.value,
+#                        "msg": "Aadhaar number detected"})
+#         text = re.sub(r"\b\d{12}\b", "[REDACTED_AADHAAR]", text)
+
+#     # PAN
+#     if re.search(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", text):
+#         alerts.append({"level": "HIGH", "severity": Severity.HIGH.value,
+#                        "msg": "PAN card detected"})
+#         text = re.sub(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", "[REDACTED_PAN]", text)
+
+#     # Credit/Debit card
+#     if re.search(r"\b(?:\d{4}[- ]?){3}\d{4}\b", text):
+#         alerts.append({"level": "HIGH", "severity": Severity.HIGH.value,
+#                        "msg": "Card number detected"})
+#         text = re.sub(r"\b(?:\d{4}[- ]?){3}\d{4}\b", "[REDACTED_CARD]", text)
+
+#     # CVV
+#     if re.search(r"(cvv|cvc)\s*[: ]?\d{3,4}", text, re.I):
+#         alerts.append({"level": "HIGH", "severity": Severity.HIGH.value,
+#                        "msg": "CVV detected"})
+#         text = re.sub(r"(cvv|cvc)\s*[: ]?\d{3,4}", "[REDACTED_CVV]", text, flags=re.I)
+
+#     # Phone
+#     if re.search(r"\b\d{10}\b", text):
+#         alerts.append({"level": "MEDIUM", "severity": Severity.MEDIUM.value,
+#                        "msg": "Phone number detected"})
+#         text = re.sub(r"\b\d{10}\b", "[REDACTED_PHONE]", text)
+
+#     # Email
+#     if re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", text):
+#         alerts.append({"level": "MEDIUM", "severity": Severity.MEDIUM.value,
+#                        "msg": "Email detected"})
+#         text = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+",
+#                       "[REDACTED_EMAIL]", text)
+
+#     return text, alerts
+
+
+# def mask_for_logs(text: str):
+#     text = re.sub(r"\b(\d{3})\d{6}(\d{3})\b", r"\1******\2", text)  # Aadhaar
+#     text = re.sub(r"\b([A-Z]{5})\d{4}([A-Z])\b", r"\1****\2", text)  # PAN
+#     text = re.sub(r"\b(\d{4})\d{8}(\d{4})\b", r"\1********\2", text)  # Card
+#     text = re.sub(r"\b(\d{3})\d{4}(\d{3})\b", r"\1****\2", text)  # Phone
+#     text = re.sub(r"([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@.+)",
+#                   r"\1***\2", text)  # Email
+#     return text
+
+
+# def log_interaction(user, bot, alerts):
+#     record = {
+#         "timestamp": datetime.utcnow().isoformat(),
+#         "user": mask_for_logs(user),
+#         "bot": mask_for_logs(bot),
+#         "alerts": alerts
+#     }
+
+#     try:
+#         with open(LOG_FILE, "r") as f:
+#             data = json.load(f)
+#     except:
+#         data = []
+
+#     data.append(record)
+
+#     with open(LOG_FILE, "w") as f:
+#         json.dump(data, f, indent=4)
+
+# # ---------------------------------------------------------
+# #                FASTAPI BACKEND
+# # ---------------------------------------------------------
+# app = FastAPI(title="AI Privacy Chatbot")
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_methods=["*"],
+#     allow_headers=["*"]
+# )
+
+# class Chat(BaseModel):
+#     message: str
+
+# @app.get("/")
+# def root():
+#     return RedirectResponse("/gradio")
+
+
+# @app.post("/api/chat")
+# def api_chat(req: Chat):
+#     redacted, alerts = redact_sensitive(req.message)
+
+#     llm = client.chat_completion(
+#         messages=[{"role": "user", "content": redacted}],
+#         max_tokens=256,
+#         temperature=0.7
+#     )
+
+#     response = llm.choices[0].message["content"]
+#     safe_response, resp_alerts = redact_sensitive(response)
+
+#     all_alerts = alerts + resp_alerts
+
+#     log_interaction(req.message, response, all_alerts)
+
+#     return {"reply": safe_response, "alerts": all_alerts}
+
+
+# # ---------------------------------------------------------
+# #                GRADIO CHATBOT (v4)
+# # ---------------------------------------------------------
+# def chat_fn(history, message, strict_mode, logging_enabled):
+#     redacted, alerts = redact_sensitive(message)
+
+#     # STRICT MODE BLOCKING
+#     if strict_mode and any(a["level"] == "HIGH" for a in alerts):
+#         return history + [{"role": "assistant",
+#                            "content": "🚫 Message blocked (HIGH-risk data detected)."}]
+
+#     # LLM call
+#     reply = client.chat_completion(
+#         messages=[{"role": "user", "content": redacted}],
+#         max_tokens=256,
+#         temperature=0.7
+#     ).choices[0].message["content"]
+
+#     safe_reply, reply_alerts = redact_sensitive(reply)
+
+#     # logging
+#     if logging_enabled:
+#         log_interaction(message, reply, alerts + reply_alerts)
+
+#     history.append({"role": "assistant", "content": safe_reply})
+#     return history
+
+
+# with gr.Blocks(title="Privacy Protected AI") as gradio_ui:
+
+#     gr.Markdown("## 🔒 Privacy-Protected AI Chatbot")
+
+#     chatbot = gr.Chatbot(type="messages", height=400)
+
+#     with gr.Row():
+#         msg = gr.Textbox(scale=4, placeholder="Type your message...")
+#         send = gr.Button("Send", variant="primary")
+
+#     strict = gr.Checkbox(label="Strict Mode (Blocks HIGH data)", value=False)
+#     log_enable = gr.Checkbox(label="Enable Logging", value=True)
+
+#     send.click(chat_fn,
+#                inputs=[chatbot, msg, strict, log_enable],
+#                outputs=chatbot)
+
+#     msg.submit(chat_fn,
+#                inputs=[chatbot, msg, strict, log_enable],
+#                outputs=chatbot)
+
+
+# app = gr.mount_gradio_app(app, gradio_ui, "/gradio")
+
