@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+huggingface-hub
+gradio
+pydantic
+python-multipart
+starlette
