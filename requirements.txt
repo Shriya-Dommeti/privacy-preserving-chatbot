@@ -5,3 +5,5 @@ huggingface-hub
 pydantic
 python-multipart
 starlette
+pydub
+
