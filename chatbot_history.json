@@ -202,5 +202,207 @@
             "medium": 0,
             "low": 0
         }
+    },
+    {
+        "timestamp": "2025-11-24T08:40:39.566973",
+        "prompt": "Tell me about flowers",
+        "answer": "Flowers are one of the most beautiful and diverse aspects of nature. They are a type of plant that produces colorful, fragrant, and often delicate blooms, which serve various purposes in the plant's life cycle. Here are some interesting facts about flowers:\n\n**Types of Flowers:**\n\n1. **Annuals**: These flowers complete their life cycle in a year and bloom for a short period.\n2. **Perennials**: These flowers live for multiple years and often bloom for several months.\n3. **Bulbous**: These flowers, such as tulips and daffodils, store energy in their bulbs, which allow them to bloom for several weeks.\n4. **Tropical**: These flowers are typically found in warm, humid climates and are often brightly colored.\n\n**Functions of Flowers:**\n\n1. **Attracting Pollinators**: Flowers attract bees, butterflies, hummingbirds, and other pollinators, which help transfer pollen between plants.\n2. **Attracting Animals**: Some flowers, like those with nectar, attract animals that eat the pollen or nectar, which helps disperse seeds.\n3. **Protecting the Plant**: Flowers can produce chemicals that repel pests or attract beneficial insects.\n4. **Reproduction**: Flowers",
+        "alerts": [],
+        "severity_summary": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-24T08:43:48.989733",
+        "prompt": "Explain the benefite of eating fruits",
+        "answer": "Eating fruits is one of the most beneficial habits you can cultivate. Here are some of the numerous benefits of including fruits in your diet:\n\n1. **Rich in Antioxidants**: Fruits are packed with antioxidants, which help protect the body from damage caused by free radicals. This can lead to a reduced risk of chronic diseases like cancer, heart disease, and Alzheimer's disease.\n\n2. **Boosts Immune System**: Fruits are rich in vitamin C, which helps boost the immune system and fight off infections. A healthy immune system can help prevent illnesses and reduce the severity of symptoms when you do get sick.\n\n3. **Supports Healthy Digestion**: Fruits are high in fiber, which can help regulate bowel movements, prevent constipation, and support healthy gut bacteria. A healthy digestive system is essential for overall well-being.\n\n4. **Helps Maintain Healthy Weight**: Fruits are low in calories and high in fiber, making them an excellent choice for those looking to manage their weight. Eating fruits can help you feel full and satisfied, reducing the likelihood of overeating.\n\n5. **Promotes Healthy Skin**: The antioxidants and vitamins in fruits can help promote healthy skin, reducing the appearance of fine lines, wrinkles, and age spots.\n\n6. **Support",
+        "alerts": [],
+        "severity_summary": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-26T17:10:36.923424",
+        "prompt": "Hey I want to change my phone number 123****809 in my aadhaar help me change.",
+        "answer": "To change your phone number associated with your Aadhaar card, follow these steps:\n\n1. **Visit the UIDAI website**: Go to the official Aadhaar website (uaadhaar.gov.in) and click on \"Update Your Details\" or \"Change Mobile Number\".\n2. **Login to your Aadhaar account**: If you have already registered for an Aadhaar account, log in with your Aadhaar number and password. If not, you can register now.\n3. **Select the service**: Choose \"Update Mobile Number\" from the available services.\n4. **Enter new mobile number**: Enter your new mobile number and verify it by entering the verification code sent to your new number.\n5. **Provide PAN and other details**: You may be required to provide your Permanent Account Number (PAN) and other details to verify your identity.\n6. **Submit the request**: Submit the request to update your mobile number.\n\n**Alternative method:**\n\n1. **Visit an Aadhaar Enrolment Centre**: Visit an Aadhaar Enrolment Centre near you and fill out the Aadhaar Update form.\n2. **Provide required documents**: Provide your old mobile number, new mobile number, and other required documents like PAN, ID proof, and address proof.\n3. **Submit the",
+        "alerts": [
+            {
+                "severity": "🟡",
+                "message": "Phone number detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-28T05:59:47.740996",
+        "prompt": "Give me importance of Education",
+        "answer": "The importance of education cannot be overstated. It is the key to unlocking individual and societal potential, and it has a profound impact on various aspects of life. Here are some of the reasons why education is so important:\n\n1. **Personal Growth and Development**: Education helps individuals develop their critical thinking, problem-solving, and communication skills, leading to personal growth and self-improvement.\n2. **Economic Empowerment**: Education is a key driver of economic growth and development. It provides individuals with the skills and knowledge needed to secure better-paying jobs and improve their economic prospects.\n3. **Social Mobility**: Education can help individuals from disadvantaged backgrounds break the cycle of poverty and improve their social mobility.\n4. **Informed Decision-Making**: Education equips individuals with the knowledge and critical thinking skills needed to make informed decisions about their lives, careers, and communities.\n5. **Improved Health and Well-being**: Education has been linked to improved physical and mental health, as well as reduced mortality rates.\n6. **Global Competitiveness**: Education helps countries and individuals compete in the global economy, driving innovation and economic growth.\n7. **Environmental Awareness and Stewardship**: Education can foster environmental awareness and promote sustainable practices, essential for addressing global challenges like climate change.\n",
+        "alerts": [],
+        "severity_summary": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-28T06:06:14.018420",
+        "prompt": "Help me change my adhaar card's phone number 123****809",
+        "answer": "I can guide you on how to change your Aadhaar card's phone number. Please note that you will need to follow the official procedures and guidelines set by the Unique Identification Authority of India (UIDAI).\n\nHere are the steps to change your Aadhaar card's phone number:\n\n**Online Method:**\n\n1. Visit the official Aadhaar website: [https://www.aadhaar.gov.in/](https://www.aadhaar.gov.in/)\n2. Click on \"Self Service\" and then \"Update Your Details\"\n3. Enter your Aadhaar number, virtual ID, and CAPTCHA code\n4. Select \"Change Mobile Number\" and enter your new phone number\n5. Verify your new phone number by entering the one-time password (OTP) sent to your new number\n\n**Offline Method:**\n\n1. Visit an Aadhaar Enrolment Centre or a nearby Aadhaar Centre\n2. Bring a valid government-issued ID proof, such as a PAN card, driving license, or passport\n3. Fill out the Aadhaar Update Request Form (available at the centre)\n4. Provide your current Aadhaar card, old phone number, and new phone number\n5. Pay the required fee (if applicable)\n6. Submit the form and supporting documents to the",
+        "alerts": [
+            {
+                "severity": "🟡",
+                "message": "Phone number detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-28T06:08:39.675268",
+        "prompt": "Help me change my phone number 123****809 in my aadhar card  in  5 lines",
+        "answer": "I can guide you on how to change your phone number in your Aadhaar card. Here are the steps:\n\n1. Visit the official Aadhaar website or download the Aadhaar self-service portal app.\n2. Enter your Aadhaar number and password to log in.\n3. Click on 'Update Your Details' and select 'Phone Number' from the options.\n4. Enter your new phone number and confirm it.\n5. Follow the prompts to complete the update process.\n\nPlease note that you may need to provide additional verification steps or documentation to confirm your identity and update your phone number.",
+        "alerts": [
+            {
+                "severity": "🟡",
+                "message": "Phone number detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-28T06:16:35.436810",
+        "prompt": "\"Help me change my adhaar card's phone number 123****809",
+        "answer": "I can guide you on how to update your Aadhaar card's phone number. Please note that you'll need to follow the official procedures and provide the necessary documents to the Aadhaar authority or authorized centers. Here's a general step-by-step guide:\n\n**Option 1: Update through Aadhaar Self Service Portal**\n\n1. Visit the Aadhaar Self Service Portal: [https://aadhaar.gov.in/self-service](https://aadhaar.gov.in/self-service)\n2. Click on \"Update Your Details\" and select \"Phone Number\" from the dropdown list.\n3. Enter your Aadhaar number and current phone number.\n4. Enter your new phone number and confirm it.\n5. Fill in the Captcha and submit the request.\n\n**Option 2: Update through Aadhaar Enrolment Centre**\n\n1. Find your nearest Aadhaar Enrolment Centre: [https://www.aadhaar.gov.in/enrolment-centre](https://www.aadhaar.gov.in/enrolment-centre)\n2. Visit the centre with your Aadhaar card, proof of identity, and proof of address.\n3. Inform the centre about your desire to update your phone number.\n4. The centre will guide you through the process and update your details.\n\n**Option 3:",
+        "alerts": [],
+        "severity_summary": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-28T06:17:03.681157",
+        "prompt": "\"Help me change my adhaar card's phone number 123****809 in few lines",
+        "answer": "To change your Aadhaar card's phone number, follow these steps:\n\n1. Visit the official Aadhaar website (aadhaar.gov.in) or download the Aadhaar self-service portal app.\n2. Log in to your account using your Aadhaar number and existing password.\n3. Click on \"Update your details\" and select \"Phone Number\".\n4. Enter your new phone number (123****809) and re-enter it for verification.\n5. Confirm the changes and submit.\n\nAlternatively, you can also visit an Aadhaar Enrolment Centre or a nearby Common Service Centre (CSC) for in-person assistance.",
+        "alerts": [],
+        "severity_summary": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-28T06:18:23.958572",
+        "prompt": "how to change the phone number in my adhaar card whose number is 123******112",
+        "answer": "To change the phone number on your Aadhaar card, you'll need to follow these steps:\n\n**Method 1: Update through the Aadhaar Self Service Portal**\n\n1. Visit the official Aadhaar website: [www Aadhaar.gov.in](http://www.aadhaar.gov.in)\n2. Click on \"Self Services\" and then select \"Update Your Details\"\n3. Enter your Aadhaar number and the new phone number you want to update\n4. Verify your identity through the CAPTCHA and enter the one-time password (OTP) sent to your registered mobile number\n5. Fill in the required details and submit the application\n\n**Method 2: Update through the Aadhaar Enrolment Centre**\n\n1. Visit an Aadhaar Enrolment Centre near you\n2. Take a printout of the \"Update Your Details\" form from the Aadhaar website\n3. Fill in the form with the new phone number you want to update\n4. Submit the form along with your Aadhaar card and any required documents (such as a valid ID proof and address proof)\n5. The centre will verify your identity and update your phone number\n\n**Method 3: Update through the Aadhaar Mobile App**\n\n1. Download and install the Aadhaar mobile app from",
+        "alerts": [
+            {
+                "severity": "🔴",
+                "message": "Card number detected and redacted",
+                "level": "HIGH"
+            }
+        ],
+        "severity_summary": {
+            "high": 1,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-28T06:21:17.786328",
+        "prompt": "Help me change my phone number 123****809 in my aadhar card  in  few lines",
+        "answer": "I can guide you through the process. Please note that you'll need to follow the official guidelines and procedures set by the Unique Identification Authority of India (UIDAI) for changing your phone number in your Aadhaar card.\n\nHere's a simplified step-by-step process:\n\n1. **Visit the UIDAI website**: Go to [www.aadhaar.gov.in](http://www.aadhaar.gov.in) and click on \"Update Your Details\" or \"Change Details\".\n2. **Login to your Aadhaar account**: If you have already enrolled for an Aadhaar card, log in to your account using your Aadhaar number and password.\n3. **Select the option to change your phone number**: Under the \"Update Your Details\" section, select the option to change your phone number.\n4. **Fill in the required details**: Enter your existing phone number, new phone number, and other required details.\n5. **Verify your identity**: You may need to verify your identity through a one-time password (OTP) sent to your new or existing phone number.\n6. **Submit the request**: Once you've verified your identity, submit the request to update your phone number.\n\n**Alternative method:**\n\nIf you're unable to update your phone number online, you can visit an",
+        "alerts": [
+            {
+                "severity": "🟡",
+                "message": "Phone number detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-29T05:24:39.576773",
+        "prompt": "Give me a roadmap for python fullstcak",
+        "answer": "**Python Full Stack Roadmap**\n\nA full stack development in Python involves covering various aspects of web development, including front-end, back-end, database, and testing. Here's a comprehensive roadmap to help you get started:\n\n**Phase 1: Front-end Development (4-6 weeks)**\n\n1. **HTML, CSS, and JavaScript**\n\t* Learn the basics of HTML, CSS, and JavaScript.\n\t* Understand how to use CSS preprocessors like Sass or Less.\n\t* Familiarize yourself with front-end frameworks like React, Angular, or Vue.js.\n2. **Front-end Libraries and Tools**\n\t* Learn about popular front-end libraries like jQuery, Lodash, and Moment.js.\n\t* Understand how to use front-end frameworks like Bootstrap or Material-UI.\n3. **Responsive Design and Mobile Development**\n\t* Learn about responsive design principles and how to build mobile-friendly websites.\n\t* Understand how to use mobile-first development approaches.\n\n**Phase 2: Back-end Development (4-6 weeks)**\n\n1. **Python and Frameworks**\n\t* Learn the basics of Python and its ecosystem.\n\t* Choose a back-end framework like Flask, Django, or Pyramid.\n\t* Learn how to use the framework to build a RESTful API",
+        "alerts": [],
+        "severity_summary": {
+            "high": 0,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-29T05:27:20.771184",
+        "prompt": "how to change the phone number in my adhaar card whose number is 123******212",
+        "answer": "To change the phone number on your Aadhaar card, follow these steps:\n\n**Online Method:**\n\n1. Visit the official Aadhaar website: [https://aadhaar.gov.in/](https://aadhaar.gov.in/)\n2. Click on \"Services\" and then select \"Update Aadhaar Details\".\n3. Fill in your Aadhaar number, captcha, and other required details.\n4. Select \"Phone Number\" as the field to update and enter your new phone number.\n5. Fill in the verification code sent to your new phone number.\n6. Confirm the update.\n\n**Mobile App Method:**\n\n1. Download and install the Aadhaar mobile app (available for both Android and iOS).\n2. Open the app and log in with your Aadhaar number and PIN.\n3. Select \"Update Aadhaar Details\" and then \"Phone Number\".\n4. Enter your new phone number and fill in the verification code sent to your new phone number.\n5. Confirm the update.\n\n**Offline Method::\n\n1. Visit an Aadhaar Enrolment Centre or a nearby Aadhaar Update Centre.\n2. Fill in your Aadhaar number and other required details.\n3. Provide your old phone number and the reason for updating it.\n4. Fill in the required documents (e",
+        "alerts": [
+            {
+                "severity": "🔴",
+                "message": "Aadhaar number detected and redacted",
+                "level": "HIGH"
+            }
+        ],
+        "severity_summary": {
+            "high": 1,
+            "medium": 0,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-29T05:28:22.839253",
+        "prompt": "Hey I want to change my phone number 123****809 in my aadhaar help me change.",
+        "answer": "To change your phone number associated with your Aadhaar card, you can follow these steps:\n\n**Method 1: Change phone number through Aadhaar portal**\n\n1. Go to the official Aadhaar website: [www.aadhaar.gov.in](http://www.aadhaar.gov.in)\n2. Click on \"Self Services\" and then select \"Update Your Profile\"\n3. Enter your Aadhaar number and CAPTCHA\n4. Select \"Change Mobile Number\" from the options\n5. Enter your new phone number and verify it through an OTP\n6. Confirm the change\n\n**Method 2: Change phone number through Aadhaar mobile app**\n\n1. Download and install the Aadhaar mobile app from the Google Play Store or Apple App Store\n2. Log in to the app using your Aadhaar number and password\n3. Tap on \"Update Your Profile\" and then select \"Change Mobile Number\"\n4. Enter your new phone number and verify it through an OTP\n5. Confirm the change\n\n**Method 3: Change phone number through Aadhaar enrollment center**\n\n1. Find your nearest Aadhaar enrollment center\n2. Take a copy of your existing Aadhaar card and the new phone number proof (e.g., bill or registration document)\n3. Visit",
+        "alerts": [
+            {
+                "severity": "🟡",
+                "message": "Phone number detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        }
+    },
+    {
+        "timestamp": "2025-11-29T05:30:16.288462",
+        "prompt": "Hey I want to change my phone number 123****809 in my aadhaar help me change.",
+        "answer": "To change your phone number associated with your Aadhaar card, you can follow these steps:\n\n1. **Visit the Aadhaar website**: Go to the official Aadhaar website ([https://aadhaar.gov.in/](https://aadhaar.gov.in/)) and click on \"Self Services\" or \"Login\" if you have an Aadhaar account.\n2. **Click on \"Update Your Details\"**: On the self-service page, click on \"Update Your Details\" or \"Request OTP\" to update your phone number.\n3. **Enter your Aadhaar number**: Enter your Aadhaar number and the verification code sent to your registered email id or mobile number.\n4. **Select \"Update Phone Number\"**: Choose \"Update Phone Number\" from the dropdown menu.\n5. **Enter new phone number**: Enter your new phone number and verify it using a one-time password (OTP) sent to your new phone number.\n6. **Confirm the update**: Confirm the update by re-entering your new phone number and verifying it again.\n\nAlternatively, you can also visit an **Aadhaar Enrolment Centre** or **Aadhaar Service Centre** near you and update your phone number in person. You will need to provide your Aadhaar card, ID proof, and",
+        "alerts": [
+            {
+                "severity": "🟡",
+                "message": "Phone number detected and redacted",
+                "level": "MEDIUM"
+            }
+        ],
+        "severity_summary": {
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        }
     }
 ]

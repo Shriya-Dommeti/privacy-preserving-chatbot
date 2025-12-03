@@ -1,0 +1,8 @@
+fastapi==0.110.0
+uvicorn==0.29.0
+gradio==3.41.2
+pydub==0.25.1
+ffmpeg-python==0.2.0
+huggingface_hub==0.23.4
+starlette==0.36.3
+python-multipart==0.0.9
