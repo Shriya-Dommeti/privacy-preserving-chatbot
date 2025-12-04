@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS with improved text visibility
+# Custom CSS with light attractive backgrounds
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -23,10 +23,12 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
     
+    /* Main app background - gradient */
     .stApp {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     
+    /* Container background */
     .main .block-container {
         padding: 2rem;
         background: white;
@@ -35,7 +37,7 @@ st.markdown("""
         max-width: 1400px;
     }
     
-    /* Improved Chat Message Styling */
+    /* Chat Messages - Base styling */
     .stChatMessage {
         border-radius: 16px !important;
         padding: 20px !important;
@@ -45,27 +47,39 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     }
     
-    /* User Message - White text on gradient */
-    .stChatMessage[data-testid="user-message"] {
+    /* User Message - Purple gradient with white text */
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: white !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+        margin: 12px 0 !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
     }
     
-    .stChatMessage[data-testid="user-message"] p {
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) p,
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) * {
         color: white !important;
         font-weight: 500 !important;
+        font-size: 17px !important;
     }
     
-    /* Assistant Message - Light attractive background with dark text */
-    .stChatMessage[data-testid="assistant-message"] {
+    /* Assistant Message - Light golden/yellow gradient with dark text */
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fef9c3 100%) !important;
         border: 2px solid #fbbf24 !important;
         color: #1e293b !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+        margin: 12px 0 !important;
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2) !important;
     }
     
-    .stChatMessage[data-testid="assistant-message"] p {
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) p,
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) * {
         color: #1e293b !important;
         font-weight: 500 !important;
+        font-size: 17px !important;
     }
     
     /* All text in chat messages */
@@ -122,19 +136,19 @@ st.markdown("""
     }
     
     /* Sidebar */
-    .css-1d391kg, [data-testid="stSidebar"] {
+    section[data-testid="stSidebar"] {
         background: #f8fafc !important;
     }
     
-    .css-1d391kg h3, [data-testid="stSidebar"] h3 {
+    section[data-testid="stSidebar"] h3 {
         color: #1e293b !important;
         font-weight: 700 !important;
     }
     
     /* Sidebar text */
-    .css-1d391kg p, [data-testid="stSidebar"] p,
-    .css-1d391kg label, [data-testid="stSidebar"] label,
-    .css-1d391kg .stMarkdown, [data-testid="stSidebar"] .stMarkdown {
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] .stMarkdown {
         color: #334155 !important;
         font-size: 14px !important;
     }
@@ -292,7 +306,7 @@ def mask_sensitive_data(text: str) -> str:
     return text
 
 def log_interaction(prompt: str, answer: str, alerts: list[dict]):
-    """Log interactions with masked data and severity information in a user-friendly format."""
+    """Log interactions with masked data in a user-friendly format."""
     masked_prompt = mask_sensitive_data(prompt)
     masked_answer = mask_sensitive_data(answer)
     
@@ -310,8 +324,11 @@ def log_interaction(prompt: str, answer: str, alerts: list[dict]):
             "icon": alert["severity"]
         })
     
+    # Get conversation ID
+    conv_id = len(st.session_state.messages) // 2 if st.session_state.messages else 1
+    
     record = {
-        "conversation_id": len(st.session_state.messages) // 2,
+        "conversation_id": conv_id,
         "date": formatted_date,
         "time": formatted_time,
         "timestamp_iso": timestamp.isoformat(),
@@ -341,9 +358,19 @@ def log_interaction(prompt: str, answer: str, alerts: list[dict]):
         # Try to read existing log
         with open(LOG_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            if not isinstance(data, dict):
+            # Check if it's old format (list) or new format (dict)
+            if isinstance(data, list):
                 # Convert old format to new format
-                data = {"metadata": {"total_conversations": 0, "last_updated": ""}, "conversations": []}
+                data = {
+                    "metadata": {
+                        "application": "Privacy Shield AI Chatbot",
+                        "version": "1.0",
+                        "description": "Conversation logs with privacy protection and sensitive data redaction",
+                        "total_conversations": len(data),
+                        "last_updated": ""
+                    },
+                    "conversations": data
+                }
     except (FileNotFoundError, json.JSONDecodeError):
         # Create new log structure
         data = {
