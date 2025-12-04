@@ -34,7 +34,7 @@ st.markdown("""
         background: white;
         border-radius: 16px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-width: 400px;
+        max-width: 1400px;
     }
     
     /* Chat Messages - Base styling */
