@@ -201,7 +201,7 @@ client = InferenceClient(token=HF_TOKEN)
 LOG_FILE = "chatbot_history.json"
 
 # ---------------------- Severity Levels ----------------------
-class SeverityLevel(Enum:
+class SeverityLevel(Enum):
     LOW = "🟢"
     MEDIUM = "🟡"
     HIGH = "🔴"
