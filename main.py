@@ -66,7 +66,7 @@ st.markdown("""
     
     /* Assistant Message - Light golden/yellow gradient with dark text */
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fef9c3 100%) !important;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
         border: 2px solid #fbbf24 !important;
         color: #1e293b !important;
         border-radius: 16px !important;
