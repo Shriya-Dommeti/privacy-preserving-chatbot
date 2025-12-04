@@ -11,195 +11,333 @@ st.set_page_config(
     page_title="🔒 Privacy Shield AI",
     page_icon="🔒",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# Custom CSS with light attractive backgrounds
+# Custom CSS for modern dark UI
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
     * {
         font-family: 'Inter', sans-serif;
     }
     
-    /* Main app background - gradient */
+    /* Main app background - dark gradient */
     .stApp {
-        background: linear-gradient(-20deg, #616161 0%, #9bc5c3 100%);
+        background: linear-gradient(135deg, #1a1d2e 0%, #2d1b4e 100%);
+    }
+    
+    /* Hide default header */
+    header[data-testid="stHeader"] {
+        background: transparent;
     }
     
     /* Container background */
     .main .block-container {
-        padding: 2rem;
-        background: white;
+        padding: 1.5rem 2rem;
+        max-width: 1200px;
+    }
+    
+    /* Custom Header */
+    .custom-header {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: rgba(45, 55, 85, 0.6);
+        backdrop-filter: blur(10px);
         border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-width: 1400px;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(139, 92, 246, 0.3);
     }
     
-    /* Chat Messages - Base styling */
+    .custom-header h1 {
+        color: #a78bfa;
+        font-size: 36px;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+    
+    .custom-header p {
+        color: #cbd5e1;
+        font-size: 15px;
+        margin: 8px 0 0 0;
+        font-weight: 500;
+    }
+    
+    .custom-header .subtext {
+        color: #94a3b8;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+    
+    /* Chat container */
+    .chat-container {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        min-height: 400px;
+        max-height: 500px;
+        overflow-y: auto;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    
+    /* Chat Messages */
     .stChatMessage {
-        border-radius: 16px !important;
-        padding: 20px !important;
-        margin: 12px 0 !important;
-        font-size: 17px !important;
-        line-height: 1.7 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 12px 0 !important;
     }
     
-    /* User Message - Purple gradient with white text */
+    /* User Message */
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-        color: black !important;
-        border-radius: 16px !important;
-        padding: 20px !important;
-        margin: 12px 0 !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
-        text-align:left;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border-radius: 12px !important;
+        padding: 14px 18px !important;
+        margin: 8px 0 !important;
+        margin-left: auto !important;
+        max-width: 85% !important;
+        float: right !important;
+        clear: both !important;
     }
     
-    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) p,
-    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) * {
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) p {
         color: white !important;
+        font-size: 15px !important;
+        margin: 0 !important;
         font-weight: 500 !important;
-        font-size: 17px !important;
     }
     
-    /* Assistant Message - Light golden/yellow gradient with dark text */
+    /* Assistant Message */
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-        border: 2px solid #fbbf24 !important;
-        color: black !important;
-        border-radius: 16px !important;
-        padding: 20px !important;
-        margin: 12px 0 !important;
-        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2) !important;
+        background: rgba(51, 65, 85, 0.9) !important;
+        border-radius: 12px !important;
+        padding: 14px 18px !important;
+        margin: 8px 0 !important;
+        max-width: 85% !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
     }
     
-    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) p,
-    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) * {
-        color: #1e293b !important;
-        font-weight: 500 !important;
-        font-size: 17px !important;
+    div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) p {
+        color: #e2e8f0 !important;
+        font-size: 15px !important;
+        margin: 0 !important;
+        line-height: 1.6 !important;
     }
     
-    /* All text in chat messages */
-    .stChatMessage * {
-        font-size: 17px !important;
-        line-height: 1.7 !important;
+    /* Chat Input Container */
+    .stChatInputContainer {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
     }
     
     /* Chat Input */
-    .stChatInputContainer {
-        border-top: 2px solid #e5e7eb;
-        padding-top: 1rem;
-        background: white;
+    .stChatInput {
+        background: rgba(30, 41, 59, 0.8) !important;
+        backdrop-filter: blur(10px);
+        border-radius: 12px !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+        padding: 0 !important;
     }
     
     .stChatInput textarea {
-        border: 2px solid #e5e7eb !important;
-        border-radius: 12px !important;
-        font-size: 16px !important;
-        color: #1e293b !important;
-        padding: 12px !important;
+        background: transparent !important;
+        color: #e2e8f0 !important;
+        border: none !important;
+        font-size: 15px !important;
+        padding: 14px 18px !important;
     }
     
-    .stChatInput textarea:focus {
-        border-color: #667eea !important;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    .stChatInput textarea::placeholder {
+        color: #94a3b8 !important;
     }
     
     /* Buttons */
-    .stButton>button {
+    .stButton button {
         border-radius: 10px !important;
         font-weight: 600 !important;
-        transition: all 0.3s ease !important;
-        padding: 12px 32px !important;
         font-size: 15px !important;
-    }
-    
-    .stButton>button[kind="primary"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        padding: 10px 24px !important;
+        transition: all 0.3s ease !important;
         border: none !important;
+    }
+    
+    .stButton button[kind="primary"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: white !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
     }
     
-    .stButton>button[kind="primary"]:hover {
+    .stButton button[kind="secondary"] {
+        background: rgba(51, 65, 85, 0.8) !important;
+        color: #e2e8f0 !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    }
+    
+    .stButton button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5) !important;
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3) !important;
     }
     
-    .stButton>button[kind="secondary"] {
-        background: #f1f5f9 !important;
-        color: #475569 !important;
-        border: 2px solid #e2e8f0 !important;
+    /* Info Panel */
+    .info-panel {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    
+    .info-item {
+        text-align: center;
+        padding: 12px;
+    }
+    
+    .info-item .icon {
+        font-size: 32px;
+        margin-bottom: 6px;
+    }
+    
+    .info-item .label {
+        color: #e2e8f0;
+        font-weight: 700;
+        font-size: 14px;
+        margin: 4px 0;
+    }
+    
+    .info-item .desc {
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    /* Alert Boxes */
+    .alert-safe {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        border-left: 4px solid #10b981;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 12px;
+    }
+    
+    .alert-safe strong {
+        color: #34d399 !important;
+        font-size: 14px;
+    }
+    
+    .alert-safe p {
+        color: #94a3b8 !important;
+        font-size: 12px !important;
+        margin-top: 4px !important;
+    }
+    
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        border-left: 4px solid #ef4444;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 12px;
+    }
+    
+    .alert-danger strong {
+        color: #f87171 !important;
+        font-size: 14px;
+    }
+    
+    .alert-danger p, .alert-danger span {
+        color: #fca5a5 !important;
+        font-size: 13px !important;
+        margin: 4px 0 !important;
+    }
+    
+    .alert-blocked {
+        background: rgba(239, 68, 68, 0.2);
+        border: 2px solid rgba(239, 68, 68, 0.5);
+        border-left: 5px solid #ef4444;
+        border-radius: 10px;
+        padding: 16px 20px;
+    }
+    
+    .alert-blocked strong {
+        color: #fca5a5 !important;
+        font-size: 16px !important;
+    }
+    
+    .alert-blocked p {
+        color: #fecaca !important;
+        font-size: 14px !important;
+        margin: 8px 0 !important;
     }
     
     /* Sidebar */
     section[data-testid="stSidebar"] {
-        background: #f8fafc !important;
+        background: rgba(30, 41, 59, 0.95) !important;
+        backdrop-filter: blur(10px);
     }
     
     section[data-testid="stSidebar"] h3 {
-        color: #1e293b !important;
+        color: #a78bfa !important;
         font-weight: 700 !important;
     }
     
-    /* Sidebar text */
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] .stMarkdown {
-        color: #334155 !important;
-        font-size: 14px !important;
-    }
-    
-    /* Checkbox and Radio labels */
-    .stCheckbox label, .stRadio label {
-        color: #1e293b !important;
+    section[data-testid="stSidebar"] label {
+        color: #e2e8f0 !important;
         font-weight: 600 !important;
-        font-size: 15px !important;
     }
     
-    /* Header text */
-    h1, h2, h3 {
-        color: #1e293b !important;
-    }
-    
-    h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 500 !important;
-        font-size: 42px !important;
-    }
-    
-    /* Markdown text in main area */
-    .main .stMarkdown {
-        color: #1e293b !important;
-    }
-    
-    /* Info boxes */
-    .stAlert {
-        border-radius: 10px !important;
-        padding: 16px !important;
+    section[data-testid="stSidebar"] p {
+        color: #94a3b8 !important;
     }
     
     /* Success message */
     .stSuccess {
-        background-color: #d1fae5 !important;
-        color: #065f46 !important;
-        border-left: 4px solid #10b981 !important;
+        background: rgba(16, 185, 129, 0.15) !important;
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
+        color: #34d399 !important;
     }
     
-    .stSuccess p, .stSuccess strong {
-        color: #065f46 !important;
+    .stSuccess p {
+        color: #34d399 !important;
+    }
+    
+    /* Error message */
+    .stError {
+        background: rgba(239, 68, 68, 0.15) !important;
+        border: 1px solid rgba(239, 68, 68, 0.4) !important;
+        color: #f87171 !important;
     }
     
     /* Spinner */
     .stSpinner > div {
-        border-top-color: #667eea !important;
+        border-top-color: #a78bfa !important;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(139, 92, 246, 0.5);
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(139, 92, 246, 0.7);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -311,12 +449,10 @@ def log_interaction(prompt: str, answer: str, alerts: list[dict]):
     masked_prompt = mask_sensitive_data(prompt)
     masked_answer = mask_sensitive_data(answer)
     
-    # Create user-friendly timestamp
     timestamp = datetime.utcnow()
     formatted_date = timestamp.strftime("%B %d, %Y")
     formatted_time = timestamp.strftime("%I:%M:%S %p UTC")
     
-    # Build alert summary
     alert_summary = []
     for alert in alerts:
         alert_summary.append({
@@ -325,7 +461,6 @@ def log_interaction(prompt: str, answer: str, alerts: list[dict]):
             "icon": alert["severity"]
         })
     
-    # Get conversation ID
     conv_id = len(st.session_state.messages) // 2 if st.session_state.messages else 1
     
     record = {
@@ -356,86 +491,57 @@ def log_interaction(prompt: str, answer: str, alerts: list[dict]):
     }
 
     try:
-        # Try to read existing log
         with open(LOG_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            # Check if it's old format (list) or new format (dict)
             if isinstance(data, list):
-                # Convert old format to new format
                 data = {
                     "metadata": {
                         "application": "Privacy Shield AI Chatbot",
                         "version": "1.0",
-                        "description": "Conversation logs with privacy protection and sensitive data redaction",
+                        "description": "Conversation logs with privacy protection",
                         "total_conversations": len(data),
                         "last_updated": ""
                     },
                     "conversations": data
                 }
     except (FileNotFoundError, json.JSONDecodeError):
-        # Create new log structure
         data = {
             "metadata": {
                 "application": "Privacy Shield AI Chatbot",
                 "version": "1.0",
-                "description": "Conversation logs with privacy protection and sensitive data redaction",
+                "description": "Conversation logs with privacy protection",
                 "total_conversations": 0,
                 "last_updated": ""
             },
             "conversations": []
         }
 
-    # Add new conversation
     data["conversations"].append(record)
     data["metadata"]["total_conversations"] = len(data["conversations"])
     data["metadata"]["last_updated"] = f"{formatted_date} at {formatted_time}"
 
-    # Write back to file with pretty formatting
     with open(LOG_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 def format_alert_badge(alerts, mode, sensitivity):
-    """Format alerts into HTML badge with high contrast."""
+    """Format alerts into HTML badge."""
     if alerts:
-        alert_html = """
-        <div style='background: #fee2e2; padding: 14px 18px; border-radius: 10px; 
-                    border-left: 5px solid #dc2626; margin-top: 14px; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.1);'>
-            <strong style='color: #991b1b; font-size: 16px;'>🔒 Privacy Alerts Detected:</strong><br/>
-            <div style='margin-top: 10px;'>
-        """
+        alert_html = """<div class='alert-danger'><strong>🔒 Privacy Alerts Detected:</strong><div style='margin-top: 8px;'>"""
         for alert in alerts:
-            color = "#991b1b" if alert['level'] == "HIGH" else "#b45309"
-            alert_html += f"<span style='color: {color}; font-weight: 700; font-size: 15px; display: block; margin: 6px 0;'>{alert['severity']} {alert['message']}</span>"
-        alert_html += f"""</div>
-            <p style='color: #6b7280; font-size: 13px; margin-top: 10px; font-weight: 600;'>
-            Mode: {'🔒 Strict' if mode else '🔓 Relaxed'} | Sensitivity: {sensitivity}
-            </p>
-        </div>
-        """
+            alert_html += f"<span>{alert['severity']} {alert['message']}</span><br/>"
+        alert_html += f"""</div><p style='margin-top: 8px;'>Mode: {'🔒 Strict' if mode else '🔓 Relaxed'} | Sensitivity: {sensitivity}</p></div>"""
         return alert_html
     else:
-        return f"""
-        <div style='background: #d1fae5; padding: 14px 18px; border-radius: 10px; 
-                    border-left: 5px solid #10b981; margin-top: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.1);'>
-            <strong style='color: #065f46; font-size: 16px;'>🟢 No Sensitive Data Detected - Message is Safe</strong>
-            <p style='color: #047857; font-size: 13px; margin-top: 6px; font-weight: 600;'>
-            Mode: {'🔒 Strict' if mode else '🔓 Relaxed'} | Sensitivity: {sensitivity}
-            </p>
-        </div>
-        """
+        return f"""<div class='alert-safe'><strong>🟢 No Sensitive Data Detected - Message is Safe</strong><p>Mode: {'🔒 Strict' if mode else '🔓 Relaxed'} | Sensitivity: {sensitivity}</p></div>"""
 
 # ---------------------- UI Layout ----------------------
-# Header
+# Custom Header
 st.markdown("""
-    <div style='text-align: center; padding: 20px; background: white; border-radius: 12px; margin-bottom: 20px;'>
-        <h1 style='margin: 0;'>🔒 Privacy Shield AI</h1>
-        <p style='font-size: 17px; color: #475569; font-weight: 600; margin-top: 8px;'>
-            Enterprise-Grade Chatbot with Real-Time Sensitive Data Protection
-        </p>
-        <p style='font-size: 14px; color: #64748b; font-weight: 500; margin-top: 4px;'>
-            Powered by Meta Llama 3.2 3B Instruct
-        </p>
-    </div>
+<div class='custom-header'>
+    <h1>🔒 Privacy Shield AI</h1>
+    <p>Enterprise-Grade Chatbot with Real-Time Sensitive Data Protection</p>
+    <p class='subtext'>Powered by Meta Llama 3.2 3B Instruct</p>
+</div>
 """, unsafe_allow_html=True)
 
 # Sidebar for settings
@@ -449,11 +555,11 @@ with st.sidebar:
     )
     
     st.markdown("""
-    <div style='background: #fef3c7; padding: 10px; border-radius: 8px; margin: 12px 0; 
-                border-left: 4px solid #f59e0b;'>
-        <p style='color: #92400e; font-size: 13px; font-weight: 600; margin: 0;'>
-        <strong style='color: #78350f;'>🔒 Strict Mode:</strong> Blocks messages containing Aadhaar, PAN, Cards, CVV<br/>
-        <strong style='color: #78350f;'>🔓 Relaxed Mode:</strong> Allows messages but redacts sensitive data
+    <div style='background: rgba(245, 158, 11, 0.15); padding: 12px; border-radius: 8px; 
+                margin: 12px 0; border-left: 4px solid #f59e0b;'>
+        <p style='color: #fbbf24; font-size: 13px; margin: 0;'>
+        <strong>🔒 Strict Mode:</strong> Blocks HIGH-risk data<br/>
+        <strong>🔓 Relaxed Mode:</strong> Redacts but allows
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -461,54 +567,48 @@ with st.sidebar:
     st.session_state.enable_logging = st.checkbox(
         "📝 Enable Logging",
         value=st.session_state.enable_logging,
-        help="Save conversation history to file"
+        help="Save conversation history"
     )
     
     st.session_state.sensitivity_level = st.radio(
         "🎚️ Sensitivity Level",
         options=["Low", "Medium", "High"],
-        index=["Low", "Medium", "High"].index(st.session_state.sensitivity_level),
-        help="Detection strictness (affects future updates)"
+        index=2,
+        help="Detection strictness"
     )
     
     st.markdown("---")
     
-    if st.button("💾 Save Settings", type="primary", use_container_width=True):
-        mode_text = "🔒 Strict Mode (Blocks HIGH-risk data)" if st.session_state.strict_mode else "🔓 Relaxed Mode (Redacts data)"
-        st.success(f"""
-**✅ Settings Updated Successfully!**
-
-**🔐 Privacy Mode:** {mode_text}  
-**📝 Logging:** {'Enabled' if st.session_state.enable_logging else 'Disabled'}  
-**🎚️ Sensitivity:** {st.session_state.sensitivity_level}
-        """)
-    
-    if st.button("🗑️ Clear Chat History", use_container_width=True):
-        st.session_state.messages = []
-        st.rerun()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("💾 Save", type="primary", use_container_width=True):
+            st.success("✅ Settings saved!")
+    with col2:
+        if st.button("🗑️ Clear", use_container_width=True):
+            st.session_state.messages = []
+            st.rerun()
 
 # Info panel
 st.markdown("""
-    <div style='text-align: center; padding: 18px; background: #f1f5f9; 
-                border-radius: 12px; margin-bottom: 24px; border: 2px solid #cbd5e1;'>
-        <div style='display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;'>
-            <div style='text-align: center;'>
-                <span style='font-size: 28px;'>🔴</span>
-                <p style='margin: 0;'><strong style='color: #dc2626; font-size: 16px;'>HIGH</strong></p>
-                <p style='color: #475569; font-size: 13px; margin: 6px 0 0 0; font-weight: 600;'>Aadhaar, PAN, Cards, CVV</p>
-            </div>
-            <div style='text-align: center;'>
-                <span style='font-size: 28px;'>🟡</span>
-                <p style='margin: 0;'><strong style='color: #f59e0b; font-size: 16px;'>MEDIUM</strong></p>
-                <p style='color: #475569; font-size: 13px; margin: 6px 0 0 0; font-weight: 600;'>Email, Phone, Postal Code</p>
-            </div>
-            <div style='text-align: center;'>
-                <span style='font-size: 28px;'>🟢</span>
-                <p style='margin: 0;'><strong style='color: #10b981; font-size: 16px;'>SAFE</strong></p>
-                <p style='color: #475569; font-size: 13px; margin: 6px 0 0 0; font-weight: 600;'>No Sensitive Data</p>
-            </div>
+<div class='info-panel'>
+    <div style='display: flex; justify-content: space-around; flex-wrap: wrap;'>
+        <div class='info-item'>
+            <div class='icon'>🔴</div>
+            <div class='label'>HIGH</div>
+            <div class='desc'>Aadhaar, PAN, Cards, CVV</div>
+        </div>
+        <div class='info-item'>
+            <div class='icon'>🟡</div>
+            <div class='label'>MEDIUM</div>
+            <div class='desc'>Email, Phone, Postal Code</div>
+        </div>
+        <div class='info-item'>
+            <div class='icon'>🟢</div>
+            <div class='label'>SAFE</div>
+            <div class='desc'>No Sensitive Data</div>
         </div>
     </div>
+</div>
 """, unsafe_allow_html=True)
 
 # Display chat messages
@@ -518,42 +618,25 @@ for message in st.session_state.messages:
 
 # Chat input
 if prompt := st.chat_input("💬 Type your message here... (All sensitive data is automatically protected)"):
-    # Add user message to chat
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Process message
     with st.chat_message("assistant"):
         with st.spinner("Processing..."):
             try:
-                # Redact sensitive data
                 user_message, alerts = redact_sensitive_data(prompt)
                 
-                # Check strict mode
                 if st.session_state.strict_mode and any(alert['level'] == 'HIGH' for alert in alerts):
-                    blocked_message = """
-                    <div style='background: #fee2e2; padding: 18px; border-radius: 10px; 
-                                border-left: 5px solid #dc2626; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.1);'>
-                        <strong style='color: #991b1b; font-size: 17px;'>🚫 Message Blocked - Strict Privacy Mode</strong><br/>
-                        <p style='color: #7f1d1d; margin-top: 10px; font-size: 15px; font-weight: 500;'>
-                        Your message contains HIGH-risk sensitive data and has been blocked for your protection.</p>
-                        <p style='color: #7f1d1d; margin-top: 10px; font-size: 15px;'><strong>Detected:</strong></p>
-                        <div style='margin-top: 8px;'>
-                    """
+                    blocked_message = """<div class='alert-blocked'><strong>🚫 Message Blocked - Strict Privacy Mode</strong><p>Your message contains HIGH-risk sensitive data and has been blocked for your protection.</p><p><strong>Detected:</strong></p><div style='margin-top: 8px;'>"""
                     for alert in alerts:
                         if alert['level'] == 'HIGH':
-                            blocked_message += f"<span style='color: #991b1b; font-weight: 700; font-size: 15px; display: block; margin: 4px 0;'>{alert['severity']} {alert['message']}</span>"
-                    blocked_message += """</div>
-                        <p style='color: #78350f; margin-top: 12px; font-size: 14px; font-weight: 600; font-style: italic;'>
-                        💡 Tip: Disable strict mode in settings to allow redacted messages.</p>
-                    </div>
-                    """
+                            blocked_message += f"<span>{alert['severity']} {alert['message']}</span><br/>"
+                    blocked_message += """</div><p style='margin-top: 12px; font-style: italic;'>💡 Tip: Disable strict mode in settings to allow redacted messages.</p></div>"""
                     
                     st.markdown(blocked_message, unsafe_allow_html=True)
                     st.session_state.messages.append({"role": "assistant", "content": blocked_message})
                 else:
-                    # Get response from LLM
                     messages = [{"role": "user", "content": user_message}]
                     response = client.chat_completion(
                         messages=messages,
@@ -566,18 +649,12 @@ if prompt := st.chat_input("💬 Type your message here... (All sensitive data i
                     safe_reply, reply_alerts = redact_sensitive_data(reply)
                     all_alerts = alerts + reply_alerts
                     
-                    # Log if enabled
                     if st.session_state.enable_logging:
                         masked_user = mask_sensitive_data(prompt)
                         masked_reply = mask_sensitive_data(reply)
                         log_interaction(masked_user, masked_reply, all_alerts)
                     
-                    # Format response with alerts
-                    alert_badge = format_alert_badge(
-                        all_alerts, 
-                        st.session_state.strict_mode, 
-                        st.session_state.sensitivity_level
-                    )
+                    alert_badge = format_alert_badge(all_alerts, st.session_state.strict_mode, st.session_state.sensitivity_level)
                     full_reply = safe_reply + alert_badge
                     
                     st.markdown(full_reply, unsafe_allow_html=True)
