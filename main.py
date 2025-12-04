@@ -17,26 +17,63 @@ st.set_page_config(
 # Custom CSS with light attractive backgrounds
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
     * {
         font-family: 'Inter', sans-serif;
     }
     
-    /* Main app background - gradient */
+    /* Main app background - subtle dark gray/black */
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #101827; /* Dark background color */
     }
     
-    /* Container background */
+    /* Main Content Container - Dark/Navy Blue */
     .main .block-container {
         padding: 2rem;
-        background: white;
+        background: #0D1117; /* Very Dark Container */
         border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
         max-width: 1400px;
     }
+
+    /* Header Styling to match image */
+    /* Target the element containing the title and powered-by text */
+    div[data-testid="stVerticalBlock"] > div:first-child > div:nth-child(2) {
+        background: #1F2937; /* Darker background for the header block */
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
     
+    /* Header h1 */
+    div[data-testid="stVerticalBlock"] > div:first-child > div:nth-child(2) h1 {
+        color: #E5E7EB !important; /* White/Light Gray color */
+        font-weight: 700 !important;
+        font-size: 32px !important;
+        margin-bottom: 5px !important;
+        background: none !important;
+        -webkit-text-fill-color: unset !important;
+    }
+    
+    /* Header p (Enterprise-Grade Chatbot...) */
+    div[data-testid="stVerticalBlock"] > div:first-child > div:nth-child(2) p:nth-child(2) {
+        color: #9CA3AF !important; /* Lighter text for subtitle */
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        margin-top: 0 !important;
+        margin-bottom: 4px !important;
+    }
+    
+    /* Header p (Powered by...) */
+    div[data-testid="stVerticalBlock"] > div:first-child > div:nth-child(2) p:nth-child(3) {
+        color: #4B5563 !important; /* Darker text for model name */
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        margin-top: 0 !important;
+    }
+
     /* Chat Messages - Base styling */
     .stChatMessage {
         border-radius: 16px !important;
@@ -44,17 +81,17 @@ st.markdown("""
         margin: 12px 0 !important;
         font-size: 17px !important;
         line-height: 1.7 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        background: #1F2937 !important; /* Ensure a base dark background */
     }
     
-    /* User Message - Purple gradient with white text */
+    /* User Message - Dark Gradient Purple/Indigo with White Text */
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-        color: black !important;
-        border-radius: 16px !important;
-        padding: 20px !important;
-        margin: 12px 0 !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important; /* Dark Blue/Purple Gradient */
+        color: white !important;
+        border-radius: 16px 16px 4px 16px !important; /* Squared corner top-right */
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important;
+        align-self: flex-end; /* Push to the right */
     }
     
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) p,
@@ -64,20 +101,19 @@ st.markdown("""
         font-size: 17px !important;
     }
     
-    /* Assistant Message - Light golden/yellow gradient with dark text */
+    /* Assistant Message - Light Gray/White with Dark Text */
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        border: 2px solid #fbbf24 !important;
-        color: #1e293b !important;
-        border-radius: 16px !important;
-        padding: 20px !important;
-        margin: 12px 0 !important;
-        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2) !important;
+        background: #F3F4F6 !important; /* Light background */
+        border: 1px solid #E5E7EB !important;
+        color: #1F2937 !important;
+        border-radius: 16px 16px 16px 4px !important; /* Squared corner bottom-right */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        align-self: flex-start; /* Keep to the left */
     }
     
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) p,
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) * {
-        color: #1e293b !important;
+        color: #1F2937 !important; /* Dark text */
         font-weight: 500 !important;
         font-size: 17px !important;
     }
@@ -88,27 +124,28 @@ st.markdown("""
         line-height: 1.7 !important;
     }
     
-    /* Chat Input */
+    /* Chat Input Container */
     .stChatInputContainer {
-        border-top: 2px solid #e5e7eb;
+        border-top: 2px solid #374151; /* Darker separator */
         padding-top: 1rem;
-        background: white;
+        background: #0D1117; /* Match main container background */
     }
     
     .stChatInput textarea {
-        border: 2px solid #e5e7eb !important;
+        border: 2px solid #374151 !important;
+        background: #1F2937 !important; /* Dark input field */
+        color: #E5E7EB !important; /* Light text input */
         border-radius: 12px !important;
         font-size: 16px !important;
-        color: #1e293b !important;
         padding: 12px !important;
     }
     
     .stChatInput textarea:focus {
-        border-color: #667eea !important;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+        border-color: #6366F1 !important; /* Purple focus border */
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
     }
     
-    /* Buttons */
+    /* Buttons - Adjusted to dark theme */
     .stButton>button {
         border-radius: 10px !important;
         font-weight: 600 !important;
@@ -118,30 +155,30 @@ st.markdown("""
     }
     
     .stButton>button[kind="primary"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important;
         border: none !important;
         color: white !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important;
     }
     
     .stButton>button[kind="primary"]:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5) !important;
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5) !important;
     }
     
     .stButton>button[kind="secondary"] {
-        background: #f1f5f9 !important;
-        color: #475569 !important;
-        border: 2px solid #e2e8f0 !important;
+        background: #374151 !important; /* Darker secondary button */
+        color: #D1D5DB !important; /* Light text */
+        border: 2px solid #4B5563 !important;
     }
     
-    /* Sidebar */
+    /* Sidebar - Left as light theme for contrast/visibility */
     section[data-testid="stSidebar"] {
-        background: #f8fafc !important;
+        background: #F9FAFB !important; /* Light sidebar */
     }
     
     section[data-testid="stSidebar"] h3 {
-        color: #1e293b !important;
+        color: #1F2937 !important;
         font-weight: 700 !important;
     }
     
@@ -149,56 +186,74 @@ st.markdown("""
     section[data-testid="stSidebar"] p,
     section[data-testid="stSidebar"] label,
     section[data-testid="stSidebar"] .stMarkdown {
-        color: #334155 !important;
+        color: #374151 !important;
         font-size: 14px !important;
     }
     
     /* Checkbox and Radio labels */
     .stCheckbox label, .stRadio label {
-        color: #1e293b !important;
+        color: #1F2937 !important;
         font-weight: 600 !important;
         font-size: 15px !important;
     }
     
-    /* Header text */
+    /* Header text (inside main block, not the custom header) */
     h1, h2, h3 {
-        color: #1e293b !important;
-    }
-    
-    h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 800 !important;
-        font-size: 42px !important;
+        color: #E5E7EB !important; /* Light text for headings */
     }
     
     /* Markdown text in main area */
     .main .stMarkdown {
-        color: #1e293b !important;
+        color: #D1D5DB !important; /* Light text for general markdown */
     }
     
-    /* Info boxes */
-    .stAlert {
-        border-radius: 10px !important;
-        padding: 16px !important;
-    }
-    
-    /* Success message */
+    /* Info boxes/Alerts - Status Badge (Success/No Sensitive Data) */
+    /* Modifying the appearance of the success alert for the green badge in the image */
     .stSuccess {
-        background-color: #d1fae5 !important;
-        color: #065f46 !important;
-        border-left: 4px solid #10b981 !important;
+        background-color: #1C3228 !important; /* Dark Green background */
+        color: #A7F3D0 !important; /* Light green text */
+        border-left: 4px solid #10B981 !important;
     }
     
     .stSuccess p, .stSuccess strong {
-        color: #065f46 !important;
+        color: #A7F3D0 !important;
+    }
+    
+    /* Info Panel - Footer Legend (HIGH/MEDIUM/SAFE) */
+    /* Targeting the element before the chat input */
+    div[data-testid="stVerticalBlock"] > div:nth-last-child(2) {
+        background: #1F2937; /* Dark background for the legend panel */
+        border-radius: 12px;
+        padding: 15px 10px;
+        margin-top: 20px;
+        border-top: 2px solid #374151; /* Separator line */
+    }
+    
+    div[data-testid="stVerticalBlock"] > div:nth-last-child(2) p {
+        color: #D1D5DB !important;
+    }
+    
+    /* Colors for HIGH/MEDIUM/SAFE text in the footer legend */
+    div[data-testid="stVerticalBlock"] > div:nth-last-child(2) strong {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+    }
+    
+    /* HIGH color */
+    div[data-testid="stVerticalBlock"] > div:nth-last-child(2) strong:nth-child(1) { color: #F87171 !important; }
+    /* MEDIUM color */
+    div[data-testid="stVerticalBlock"] > div:nth-last-child(2) strong:nth-child(2) { color: #FBBF24 !important; }
+    /* SAFE color */
+    div[data-testid="stVerticalBlock"] > div:nth-last-child(2) strong:nth-child(3) { color: #4ADE80 !important; }
+    
+    /* Clear Chat Button Position Adjustment */
+    div[data-testid="stVerticalBlock"] > div:nth-last-child(2) div[data-testid="stButton"] {
+        margin-left: 20px; /* Space out the buttons */
     }
     
     /* Spinner */
     .stSpinner > div {
-        border-top-color: #667eea !important;
+        border-top-color: #6366F1 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -394,34 +449,74 @@ def log_interaction(prompt: str, answer: str, alerts: list[dict]):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 def format_alert_badge(alerts, mode, sensitivity):
-    """Format alerts into HTML badge with high contrast."""
+    """Format alerts into HTML badge with high contrast, matching the dark theme,
+       where the badge color is determined by the highest severity level detected."""
+    
+    mode_text = '🔒 Strict' if mode else '🔓 Relaxed'
+    
+    # 1. Determine the highest severity level
+    highest_severity = "SAFE"
     if alerts:
-        alert_html = """
-        <div style='background: #fee2e2; padding: 14px 18px; border-radius: 10px; 
-                    border-left: 5px solid #dc2626; margin-top: 14px; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.1);'>
-            <strong style='color: #991b1b; font-size: 16px;'>🔒 Privacy Alerts Detected:</strong><br/>
-            <div style='margin-top: 10px;'>
-        """
-        for alert in alerts:
-            color = "#991b1b" if alert['level'] == "HIGH" else "#b45309"
-            alert_html += f"<span style='color: {color}; font-weight: 700; font-size: 15px; display: block; margin: 6px 0;'>{alert['severity']} {alert['message']}</span>"
-        alert_html += f"""</div>
-            <p style='color: #6b7280; font-size: 13px; margin-top: 10px; font-weight: 600;'>
-            Mode: {'🔒 Strict' if mode else '🔓 Relaxed'} | Sensitivity: {sensitivity}
-            </p>
-        </div>
-        """
-        return alert_html
-    else:
+        # Priority: HIGH > MEDIUM > LOW
+        if any(alert['level'] == 'HIGH' for alert in alerts):
+            highest_severity = "HIGH"
+        elif any(alert['level'] == 'MEDIUM' for alert in alerts):
+            highest_severity = "MEDIUM"
+        elif any(alert['level'] == 'LOW' for alert in alerts):
+            highest_severity = "LOW"
+
+    # 2. Define colors based on the highest severity
+    if highest_severity == "HIGH":
+        # Red/Dark Red theme
+        badge_bg = "#3a1919"
+        badge_border = "#F87171"
+        badge_title_color = "#FCA5A5"
+        badge_text_color = "#FCA5A5"
+        alert_msg_title = "🔒 High-Risk Privacy Alerts Detected:"
+    elif highest_severity == "MEDIUM":
+        # Yellow/Dark Yellow theme
+        badge_bg = "#4a3219"
+        badge_border = "#FBBF24"
+        badge_title_color = "#FCD34D"
+        badge_text_color = "#FCD34D"
+        alert_msg_title = "🟡 Medium-Risk Privacy Alerts Detected:"
+    elif highest_severity == "LOW":
+        # Green/Dark Green theme (same as SAFE, but for LOW alerts)
+        badge_bg = "#1C3228"
+        badge_border = "#10B981"
+        badge_title_color = "#A7F3D0"
+        badge_text_color = "#A7F3D0"
+        alert_msg_title = "🟢 Low-Risk Privacy Alerts Detected:"
+    else: # SAFE (No alerts)
+        # Light Green/Success theme
         return f"""
         <div style='background: #d1fae5; padding: 14px 18px; border-radius: 10px; 
-                    border-left: 5px solid #10b981; margin-top: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.1);'>
+                    border-left: 5px solid #10b981; margin-top: 14px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);'>
             <strong style='color: #065f46; font-size: 16px;'>🟢 No Sensitive Data Detected - Message is Safe</strong>
-            <p style='color: #047857; font-size: 13px; margin-top: 6px; font-weight: 600;'>
-            Mode: {'🔒 Strict' if mode else '🔓 Relaxed'} | Sensitivity: {sensitivity}
+            <p style='color: #065f46; font-size: 14px; margin-top: 6px; font-weight: 600;'>
+            Mode: <span>{mode_text}</span> | Sensitivity: <span>{sensitivity}</span>
             </p>
         </div>
         """
+
+    # 3. Generate the colored alert badge HTML
+    alert_html = f"""
+    <div style='background: {badge_bg}; padding: 14px 18px; border-radius: 10px; 
+                border-left: 5px solid {badge_border}; margin-top: 14px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);'>
+        <strong style='color: {badge_title_color}; font-size: 16px;'>{alert_msg_title}</strong><br/>
+        <div style='margin-top: 10px;'>
+    """
+    for alert in alerts:
+        # Use the highest_severity text color for all individual alert messages for consistency
+        alert_html += f"<span style='color: {badge_text_color}; font-weight: 700; font-size: 15px; display: block; margin: 6px 0;'>{alert['severity']} {alert['message']}</span>"
+    
+    alert_html += f"""</div>
+        <p style='color: #9CA3AF; font-size: 14px; margin-top: 10px; font-weight: 600;'>
+        Mode: <span style='color: {badge_text_color};'>{mode_text}</span> | Sensitivity: <span style='color: {badge_text_color};'>{sensitivity}</span>
+        </p>
+    </div>
+    """
+    return alert_html
 
 # ---------------------- UI Layout ----------------------
 # Header
