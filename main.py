@@ -56,10 +56,10 @@ st.markdown("""
         font-weight: 500 !important;
     }
     
-    /* Assistant Message - Dark text on light background */
+    /* Assistant Message - Light attractive background with dark text */
     .stChatMessage[data-testid="assistant-message"] {
-        background: #f8fafc !important;
-        border: 2px solid #e2e8f0 !important;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fef9c3 100%) !important;
+        border: 2px solid #fbbf24 !important;
         color: #1e293b !important;
     }
     
@@ -292,32 +292,79 @@ def mask_sensitive_data(text: str) -> str:
     return text
 
 def log_interaction(prompt: str, answer: str, alerts: list[dict]):
-    """Log interactions with masked data and severity information."""
+    """Log interactions with masked data and severity information in a user-friendly format."""
     masked_prompt = mask_sensitive_data(prompt)
     masked_answer = mask_sensitive_data(answer)
     
+    # Create user-friendly timestamp
+    timestamp = datetime.utcnow()
+    formatted_date = timestamp.strftime("%B %d, %Y")
+    formatted_time = timestamp.strftime("%I:%M:%S %p UTC")
+    
+    # Build alert summary
+    alert_summary = []
+    for alert in alerts:
+        alert_summary.append({
+            "type": alert["message"],
+            "severity": alert["level"],
+            "icon": alert["severity"]
+        })
+    
     record = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "prompt": masked_prompt,
-        "answer": masked_answer,
-        "alerts": alerts,
-        "severity_summary": {
-            "high": sum(1 for a in alerts if a.get("level") == "HIGH"),
-            "medium": sum(1 for a in alerts if a.get("level") == "MEDIUM"),
-            "low": sum(1 for a in alerts if a.get("level") == "LOW")
+        "conversation_id": len(st.session_state.messages) // 2,
+        "date": formatted_date,
+        "time": formatted_time,
+        "timestamp_iso": timestamp.isoformat(),
+        "user_message": {
+            "original_length": len(prompt),
+            "masked_content": masked_prompt,
+            "contains_sensitive_data": len(alerts) > 0
+        },
+        "assistant_response": {
+            "original_length": len(answer),
+            "masked_content": masked_answer
+        },
+        "privacy_alerts": {
+            "total_count": len(alerts),
+            "high_risk_count": sum(1 for a in alerts if a.get("level") == "HIGH"),
+            "medium_risk_count": sum(1 for a in alerts if a.get("level") == "MEDIUM"),
+            "low_risk_count": sum(1 for a in alerts if a.get("level") == "LOW"),
+            "details": alert_summary
+        },
+        "settings": {
+            "strict_mode_enabled": st.session_state.strict_mode,
+            "sensitivity_level": st.session_state.sensitivity_level
         }
     }
 
     try:
+        # Try to read existing log
         with open(LOG_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
+            if not isinstance(data, dict):
+                # Convert old format to new format
+                data = {"metadata": {"total_conversations": 0, "last_updated": ""}, "conversations": []}
     except (FileNotFoundError, json.JSONDecodeError):
-        data = []
+        # Create new log structure
+        data = {
+            "metadata": {
+                "application": "Privacy Shield AI Chatbot",
+                "version": "1.0",
+                "description": "Conversation logs with privacy protection and sensitive data redaction",
+                "total_conversations": 0,
+                "last_updated": ""
+            },
+            "conversations": []
+        }
 
-    data.append(record)
+    # Add new conversation
+    data["conversations"].append(record)
+    data["metadata"]["total_conversations"] = len(data["conversations"])
+    data["metadata"]["last_updated"] = f"{formatted_date} at {formatted_time}"
 
+    # Write back to file with pretty formatting
     with open(LOG_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
 def format_alert_badge(alerts, mode, sensitivity):
     """Format alerts into HTML badge with high contrast."""
