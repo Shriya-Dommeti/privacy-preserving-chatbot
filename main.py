@@ -55,6 +55,7 @@ st.markdown("""
         padding: 20px !important;
         margin: 12px 0 !important;
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        text-align:left;
     }
     
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) p,
@@ -68,7 +69,7 @@ st.markdown("""
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
         border: 2px solid #fbbf24 !important;
-        color: #1e293b !important;
+        color: black !important;
         border-radius: 16px !important;
         padding: 20px !important;
         margin: 12px 0 !important;
@@ -170,7 +171,7 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-weight: 800 !important;
+        font-weight: 500 !important;
         font-size: 42px !important;
     }
     
