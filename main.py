@@ -25,7 +25,7 @@ st.markdown("""
     
     /* Main app background - gradient */
     .stApp {
-        background: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
+        background: linear-gradient(-20deg, #616161 0%, #9bc5c3 100%);
     }
     
     /* Container background */
