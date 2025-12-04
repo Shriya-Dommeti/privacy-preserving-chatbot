@@ -49,8 +49,8 @@ st.markdown("""
     
     /* User Message - Purple gradient with white text */
     div[data-testid="stChatMessageContainer"]:has(div[data-testid="chatAvatarIcon-user"]) {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        color: black !important;
         border-radius: 16px !important;
         padding: 20px !important;
         margin: 12px 0 !important;
