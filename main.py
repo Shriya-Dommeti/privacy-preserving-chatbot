@@ -51,14 +51,16 @@ st.markdown("""
 }
 
 .stChatMessage[data-testid="user-message"] {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
+    background: #e0e7ff !important;
+    color: #3730a3 !important;
     border-radius: 16px 16px 4px 16px !important;
+    border: 1px solid #c7d2fe !important;
 }
 
 .stChatMessage[data-testid="assistant-message"] {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: 1px solid #e2e8f0;
+    background: #f0fdf4 !important;
+    color: #166534 !important;
+    border: 1px solid #bbf7d0 !important;
     border-radius: 16px 16px 16px 4px !important;
 }
 
@@ -278,6 +280,12 @@ if "enable_logging" not in st.session_state:
 if "sensitivity_level" not in st.session_state:
     st.session_state.sensitivity_level = "High"
 
+if "show_history" not in st.session_state:
+    st.session_state.show_history = False
+
+if "history_data" not in st.session_state:
+    st.session_state.history_data = []
+
 # ---------------------- Sidebar Settings ----------------------
 with st.sidebar:
     st.markdown("### ⚙️ Settings")
@@ -327,6 +335,47 @@ with st.sidebar:
     if st.button("🗑️ Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
+    
+    st.markdown("---")
+    st.markdown("### 📜 Conversation History")
+    
+    # View history button
+    if st.button("📖 View Full History", use_container_width=True):
+        try:
+            with open(LOG_FILE, "r", encoding="utf-8") as f:
+                history_data = json.load(f)
+            
+            if history_data:
+                st.session_state.show_history = True
+                st.session_state.history_data = history_data
+            else:
+                st.info("No conversation history found.")
+        except (FileNotFoundError, json.JSONDecodeError):
+            st.warning("No history file found or file is empty.")
+    
+    # Download history button
+    try:
+        with open(LOG_FILE, "r", encoding="utf-8") as f:
+            history_json = f.read()
+        
+        st.download_button(
+            label="⬇️ Download History JSON",
+            data=history_json,
+            file_name=f"chatbot_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            mime="application/json",
+            use_container_width=True
+        )
+    except FileNotFoundError:
+        pass
+    
+    # Clear history button
+    if st.button("🗑️ Clear History", use_container_width=True):
+        if os.path.exists(LOG_FILE):
+            os.remove(LOG_FILE)
+            st.success("History cleared successfully!")
+            st.session_state.show_history = False
+        else:
+            st.info("No history to clear.")
 
 # ---------------------- Main Header ----------------------
 st.markdown("""
@@ -370,6 +419,59 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# ---------------------- History Viewer Modal ----------------------
+if st.session_state.show_history:
+    st.markdown("---")
+    st.markdown("### 📜 Conversation History Viewer")
+    
+    col1, col2 = st.columns([6, 1])
+    with col2:
+        if st.button("❌ Close"):
+            st.session_state.show_history = False
+            st.rerun()
+    
+    if st.session_state.history_data:
+        # Statistics
+        total_convos = len(st.session_state.history_data)
+        total_high = sum(record.get('severity_summary', {}).get('high', 0) for record in st.session_state.history_data)
+        total_medium = sum(record.get('severity_summary', {}).get('medium', 0) for record in st.session_state.history_data)
+        
+        st.markdown(f"""
+        <div style='background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 16px; border-radius: 8px; margin-bottom: 20px;'>
+            <strong>📊 Statistics</strong><br/>
+            <span style='color: #1e40af;'>Total Conversations: {total_convos}</span> | 
+            <span style='color: #dc2626;'>🔴 HIGH Alerts: {total_high}</span> | 
+            <span style='color: #f59e0b;'>🟡 MEDIUM Alerts: {total_medium}</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Display each conversation
+        for idx, record in enumerate(reversed(st.session_state.history_data), 1):
+            timestamp = record.get('timestamp', 'Unknown')
+            prompt = record.get('prompt', '')
+            answer = record.get('answer', '')
+            alerts = record.get('alerts', [])
+            severity_summary = record.get('severity_summary', {})
+            
+            with st.expander(f"💬 Conversation #{len(st.session_state.history_data) - idx + 1} - {timestamp}", expanded=False):
+                st.markdown(f"**🕒 Time:** {timestamp}")
+                st.markdown(f"**👤 User:** {prompt}")
+                st.markdown(f"**🤖 Assistant:** {answer}")
+                
+                if alerts:
+                    st.markdown("**⚠️ Alerts:**")
+                    for alert in alerts:
+                        color = "#dc2626" if alert.get('level') == 'HIGH' else "#f59e0b"
+                        st.markdown(f"<span style='color: {color};'>{alert.get('severity', '')} {alert.get('message', '')}</span>", unsafe_allow_html=True)
+                
+                st.markdown(f"""
+                <div style='background: #f8fafc; padding: 8px; border-radius: 4px; margin-top: 8px; font-size: 12px;'>
+                    📊 Summary: 🔴 {severity_summary.get('high', 0)} HIGH | 🟡 {severity_summary.get('medium', 0)} MEDIUM | 🟢 {severity_summary.get('low', 0)} LOW
+                </div>
+                """, unsafe_allow_html=True)
+    
+    st.markdown("---")
 
 # ---------------------- Chat Display ----------------------
 for message in st.session_state.messages:
