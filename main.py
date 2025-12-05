@@ -32,104 +32,91 @@ st.markdown("""
 }
 
 .stApp {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f8fafc;
 }
 
 .main .block-container {
     background: white;
     border-radius: 16px;
     padding: 24px;
-    margin: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 100%;
+    margin: 20px auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    max-width: 1400px;
+}
+
+/* Header styling */
+.header-container {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border-radius: 12px;
+    padding: 32px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);
 }
 
 .stChatMessage {
-    border-radius: 16px !important;
+    border-radius: 12px !important;
     padding: 16px !important;
     margin: 8px 0 !important;
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
 }
 
-/* USER MESSAGE BUBBLE */
 .stChatMessage[data-testid="user-message"] {
-    background: #FFE6CC !important;  /* Light orange */
-    color: #5A3E00 !important;
-    border-radius: 16px 16px 4px 16px !important;
-    border: 1px solid #FFCC99 !important;
+    background: white !important;
+    color: #1e293b !important;
+    border: 1px solid #e5e7eb !important;
 }
 
-/* ASSISTANT MESSAGE BUBBLE */
 .stChatMessage[data-testid="assistant-message"] {
-    background: #E6F0FF !important;  /* Light blue */
-    color: #003366 !important;
-    border: 1px solid #B3D1FF !important;
-    border-radius: 16px 16px 16px 4px !important;
+    background: white !important;
+    color: #1e293b !important;
+    border: 1px solid #e5e7eb !important;
 }
 
 .stChatMessage p {
-    font-size: 16px !important;
+    font-size: 15px !important;
     line-height: 1.6 !important;
+    color: #334155 !important;
 }
 
+/* Chat input */
+.stChatInputContainer {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+    background: white;
+}
+
+/* Buttons */
 .stButton>button {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     font-weight: 600 !important;
     transition: all 0.3s ease !important;
-    padding: 12px 32px !important;
+    padding: 10px 24px !important;
 }
 
 .stButton>button[kind="primary"] {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
     border: none !important;
     color: white !important;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
 }
 
 .stButton>button[kind="primary"]:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5) !important;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4) !important;
 }
 
 .stButton>button[kind="secondary"] {
-    background: #f1f5f9 !important;
-    color: #475569 !important;
-    border: 2px solid #e2e8f0 !important;
+    background: white !important;
+    color: #4f46e5 !important;
+    border: 2px solid #4f46e5 !important;
 }
 
 .stButton>button[kind="secondary"]:hover {
-    background: #e2e8f0 !important;
-    border-color: #cbd5e1 !important;
+    background: #f5f3ff !important;
 }
 
-.stTextInput>div>div>input {
-    border: 2px solid #e5e7eb !important;
-    border-radius: 10px !important;
-    padding: 12px !important;
-    font-size: 15px !important;
-}
-
-.stTextInput>div>div>input:focus {
-    border-color: #667eea !important;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-}
-
-.stCheckbox label {
-    font-weight: 600 !important;
-    color: #1e293b !important;
-    font-size: 14px !important;
-}
-
-.stRadio label {
-    font-weight: 600 !important;
-    color: #1e293b !important;
-    font-size: 14px !important;
-}
-
-.stChatInputContainer {
-    border-top: 2px solid #e5e7eb;
-    padding-top: 16px;
-}
-
+/* Sidebar */
 div[data-testid="stSidebar"] {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     padding: 20px;
@@ -139,8 +126,51 @@ div[data-testid="stSidebar"] * {
     color: white !important;
 }
 
+div[data-testid="stSidebar"] .stButton>button {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+div[data-testid="stSidebar"] .stButton>button[kind="primary"] {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    border: none !important;
+}
+
+/* Checkboxes and Radio */
+.stCheckbox label, .stRadio label {
+    font-weight: 500 !important;
+    font-size: 14px !important;
+}
+
+div[data-testid="stSidebar"] .stCheckbox label,
+div[data-testid="stSidebar"] .stRadio label {
+    color: white !important;
+}
+
+/* Text inputs */
+.stTextInput>div>div>input, .stTextArea>div>div>textarea {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+    background: white !important;
+}
+
+.stTextInput>div>div>input:focus, .stTextArea>div>div>textarea:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
 footer {
     visibility: hidden;
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    background: #f8fafc !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -381,18 +411,14 @@ with st.sidebar:
 
 # ---------------------- Main Header ----------------------
 st.markdown("""
-<div style='text-align: center; padding: 20px;'>
-    <h1 style='font-size: 42px; font-weight: 800; margin: 0; 
-               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-               -webkit-background-clip: text;
-               -webkit-text-fill-color: transparent;
-               background-clip: text;'>
+<div class="header-container">
+    <h1 style='font-size: 42px; font-weight: 800; margin: 0; color: white; text-align: center;'>
         🔒 Privacy Shield AI
     </h1>
-    <p style='font-size: 16px; color: #64748b; margin-top: 8px; font-weight: 500;'>
+    <p style='font-size: 16px; color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-weight: 500; text-align: center;'>
         Enterprise-Grade Chatbot with Real-Time Sensitive Data Protection
     </p>
-    <p style='font-size: 13px; color: #94a3b8; margin-top: 4px;'>
+    <p style='font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-top: 4px; text-align: center;'>
         Powered by Meta Llama 3.2 3B Instruct
     </p>
 </div>
@@ -400,8 +426,8 @@ st.markdown("""
 
 # ---------------------- Severity Legend ----------------------
 st.markdown("""
-<div style='text-align: center; padding: 16px; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
-            border-radius: 10px; margin-bottom: 20px; border: 1px solid #cbd5e1;'>
+<div style='text-align: center; padding: 16px; background: white; 
+            border-radius: 10px; margin-bottom: 20px; border: 1px solid #e5e7eb;'>
     <div style='display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;'>
         <div>
             <span style='font-size: 24px;'>🔴</span>
