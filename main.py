@@ -52,7 +52,7 @@ st.markdown("""
 
 .stChatMessage[data-testid="user-message"] {
     background: #e0e7ff !important;
-    color: #3730a3 !important;
+    color: #fefae0 !important;
     border-radius: 16px 16px 4px 16px !important;
     border: 1px solid #c7d2fe !important;
 }
