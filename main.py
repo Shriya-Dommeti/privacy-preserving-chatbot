@@ -51,14 +51,14 @@ st.markdown("""
 }
 
 .stChatMessage[data-testid="user-message"] {
-    background: #e0e7ff !important;
-    color: #fefae0 !important;
+    background: #fefae0 !important;
+    color: #3730a3 !important;
     border-radius: 16px 16px 4px 16px !important;
     border: 1px solid #c7d2fe !important;
 }
 
 .stChatMessage[data-testid="assistant-message"] {
-    background: #f0fdf4 !important;
+    background: #fefae0 !important;
     color: #166534 !important;
     border: 1px solid #bbf7d0 !important;
     border-radius: 16px 16px 16px 4px !important;
