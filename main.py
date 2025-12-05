@@ -50,17 +50,19 @@ st.markdown("""
     margin: 8px 0 !important;
 }
 
+/* USER MESSAGE BUBBLE */
 .stChatMessage[data-testid="user-message"] {
-    background: #fefae0 !important;
-    color: #3730a3 !important;
+    background: #FFE6CC !important;  /* Light orange */
+    color: #5A3E00 !important;
     border-radius: 16px 16px 4px 16px !important;
-    border: 1px solid #c7d2fe !important;
+    border: 1px solid #FFCC99 !important;
 }
 
+/* ASSISTANT MESSAGE BUBBLE */
 .stChatMessage[data-testid="assistant-message"] {
-    background: #fefae0 !important;
-    color: #166534 !important;
-    border: 1px solid #bbf7d0 !important;
+    background: #E6F0FF !important;  /* Light blue */
+    color: #003366 !important;
+    border: 1px solid #B3D1FF !important;
     border-radius: 16px 16px 16px 4px !important;
 }
 
